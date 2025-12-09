@@ -1,1 +1,149 @@
-<p>home works!</p>
+<div class="hero min-h-screen bg-base-100 relative overflow-hidden">
+
+  <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
+    <div class="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px]"></div>
+    <div class="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-secondary/10 rounded-full blur-[100px]"></div>
+  </div>
+
+  <div class="hero-content text-center z-10 flex-col">
+    <div class="max-w-3xl">
+      <div class="badge badge-outline mb-6 p-4">🚀 Plataforma de Gestión de Talento</div>
+
+      <h1 class="text-6xl md:text-8xl font-black tracking-tight mb-8 leading-tight">
+        Conectamos <br/>
+        <span class="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
+          Ideas con Código
+        </span>
+      </h1>
+
+      <p class="py-6 text-xl text-base-content/70 max-w-2xl mx-auto leading-relaxed">
+        LeMiBit Solutions es el puente entre programadores de élite y clientes visionarios.
+        Gestiona portafolios, agenda asesorías y lleva tus proyectos al siguiente nivel.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-6 justify-center mt-8">
+        <a routerLink="/public/explorar" class="btn btn-primary btn-lg shadow-xl hover:scale-105 transition-all px-10">
+          Explorar Talentos
+        </a>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="absolute bottom-10 animate-bounce cursor-pointer opacity-50">
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 13l5 5 5-5M7 6l5 5 5-5"/></svg>
+  </div>
+</div>
+
+<section class="py-32 bg-base-200">
+  <div class="max-w-7xl mx-auto px-6">
+
+    <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-4">
+      <div class="max-w-xl">
+        <h2 class="text-4xl font-bold mb-4">Mentes Creativas</h2>
+        <p class="text-lg text-base-content/70">
+          Detrás de cada línea de código hay una historia. Conoce a los fundadores que hacen posible LeMiBit.
+        </p>
+      </div>
+      <div class="h-1 w-32 bg-primary rounded hidden md:block"></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+
+      <div class="card bg-base-100 shadow-2xl hover:shadow-3xl transition-all duration-300 overflow-hidden group">
+        <div class="flex flex-col md:flex-row h-full">
+          <figure class="md:w-2/5 h-64 md:h-auto relative overflow-hidden">
+            <img src="https://ui-avatars.com/api/?name=Leo+Vasconez&background=0D8ABC&color=fff&size=400"
+                 alt="Leo"
+                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
+          </figure>
+          <div class="card-body md:w-3/5 p-8 justify-center">
+            <h2 class="card-title text-3xl font-bold">Leo Vasconez</h2>
+            <div class="badge badge-primary badge-lg mt-2">Full Stack Developer</div>
+            <p class="mt-4 text-base-content/80 leading-relaxed">
+              Arquitecto de soluciones escalables. Su enfoque está en el backend robusto y la lógica de negocio impecable.
+            </p>
+            <div class="mt-6 flex items-center gap-4">
+              <a href="https://github.com/LeoFV87" target="_blank" class="btn btn-neutral btn-sm gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                LeoFV87
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-2xl hover:shadow-3xl transition-all duration-300 overflow-hidden group">
+        <div class="flex flex-col md:flex-row h-full">
+          <figure class="md:w-2/5 h-64 md:h-auto relative overflow-hidden">
+            <img src="https://ui-avatars.com/api/?name=Michelle+Morocho&background=D926A9&color=fff&size=400"
+                 alt="Michelle"
+                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"/>
+          </figure>
+          <div class="card-body md:w-3/5 p-8 justify-center">
+            <h2 class="card-title text-3xl font-bold">Michelle Morocho</h2>
+            <div class="badge badge-secondary badge-lg mt-2">Frontend Engineer</div>
+            <p class="mt-4 text-base-content/80 leading-relaxed">
+              Especialista en UX/UI. Transforma requerimientos complejos en interfaces hermosas, intuitivas y accesibles.
+            </p>
+            <div class="mt-6 flex items-center gap-4">
+              <a href="https://github.com/Michelle97-bit" target="_blank" class="btn btn-neutral btn-sm gap-2">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                Michelle97-bit
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="py-32 bg-base-100">
+  <div class="max-w-7xl mx-auto px-6">
+    <div class="text-center mb-20">
+      <h2 class="text-4xl font-black mb-4">Todo en un solo lugar</h2>
+      <p class="text-xl text-base-content/60 max-w-2xl mx-auto">
+        Diseñado para simplificar la vida de administradores, programadores y clientes.
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="card bg-base-100 border border-base-200 hover:border-primary hover:shadow-2xl transition-all duration-300 group">
+        <div class="card-body items-center text-center p-10">
+          <div class="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">
+            👨‍💻
+          </div>
+          <h3 class="card-title text-2xl mb-2">Portafolios Vivos</h3>
+          <p class="text-base-content/70">
+            Olvídate de los CVs en PDF. Muestra tus proyectos académicos y laborales con despliegues en tiempo real y enlaces a GitHub.
+          </p>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 border border-base-200 hover:border-secondary hover:shadow-2xl transition-all duration-300 group">
+        <div class="card-body items-center text-center p-10">
+          <div class="w-16 h-16 rounded-2xl bg-secondary/10 flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">
+            📅
+          </div>
+          <h3 class="card-title text-2xl mb-2">Gestión de Asesorías</h3>
+          <p class="text-base-content/70">
+            Sistema integrado de calendario. Los clientes pueden solicitar reuniones técnicas y tú decides cuándo aceptarlas.
+          </p>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 border border-base-200 hover:border-accent hover:shadow-2xl transition-all duration-300 group">
+        <div class="card-body items-center text-center p-10">
+          <div class="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition-transform">
+            🔐
+          </div>
+          <h3 class="card-title text-2xl mb-2">Seguridad Total</h3>
+          <p class="text-base-content/70">
+            Acceso basado en roles (Admin, Programador, Usuario) protegido por Google Authentication y reglas de Firestore.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

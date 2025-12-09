@@ -3,8 +3,8 @@ import { Component } from '@angular/core';
 @Component({
   selector: 'app-user-management',
   imports: [],
-  templateUrl: './user-management.html',
-  styleUrl: './user-management.css',
+  templateUrl: './user-management.html'
+
 })
 export class UserManagement {
 
