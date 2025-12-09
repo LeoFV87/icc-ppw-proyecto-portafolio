@@ -16,11 +16,14 @@
   </div>
 
   <div class="flex-none gap-2">
-    @if (!currentUser()) {
+
+    @if (!currentUser() && !router.url.includes('/auth/login')) {
       <a routerLink="/auth/login" class="btn btn-primary btn-sm">
         Iniciar Sesión
       </a>
-    } @else {
+    }
+
+    @else if (currentUser()) {
       <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
           <div class="w-9 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
