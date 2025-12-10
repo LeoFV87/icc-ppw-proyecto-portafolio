@@ -1,0 +1,86 @@
+<div class="min-h-screen bg-base-200 py-12 px-4">
+  <div class="max-w-4xl mx-auto">
+
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">Configuración de Cuenta</h1>
+      <p class="text-base-content/60">Gestiona tu información personal y preferencias.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <div class="col-span-1">
+        <div class="card bg-base-100 shadow-xl text-center">
+          <div class="card-body items-center">
+            <div class="avatar online placeholder mb-4">
+              <div
+                class="bg-neutral text-neutral-content rounded-full w-32 ring ring-primary ring-offset-base-100 ring-offset-2">
+                @if (currentUser()?.photoURL) {
+                <img [src]="currentUser()?.photoURL" alt="Profile" referrerpolicy="no-referrer" />
+                } @else {
+                <span class="text-3xl">{{ currentUser()?.email?.charAt(0)?.toUpperCase() }}</span>
+                }
+              </div>
+            </div>
+
+            <h2 class="card-title text-xl">{{ currentUser()?.displayName || 'Usuario' }}</h2>
+            <p class="text-sm opacity-70 break-all">{{ currentUser()?.email }}</p>
+
+            <div class="divider"></div>
+
+            <div class="badge badge-lg" [ngClass]="{
+                   'badge-primary': hasRole('admin'),
+                   'badge-secondary': hasRole('programmer'),
+                   'badge-ghost': !hasRole('admin') && !hasRole('programmer')
+                 }">
+              {{ userProfile()?.role || 'user' | uppercase }}
+            </div>
+            <p class="text-xs mt-2 opacity-50">Rol actual</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-span-2">
+        <div class="card bg-base-100 shadow-xl">
+          <div class="card-body">
+            <h2 class="card-title mb-4">Información Básica</h2>
+
+            <form>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                  <label class="label"><span class="label-text">Nombre Completo</span></label>
+                  <input type="text" [value]="currentUser()?.displayName" class="input input-bordered" disabled />
+                  <label class="label"><span class="label-text-alt text-warning">Gestionado por Google</span></label>
+                </div>
+
+                <div class="form-control">
+                  <label class="label"><span class="label-text">Correo Electrónico</span></label>
+                  <input type="email" [value]="currentUser()?.email" class="input input-bordered" disabled />
+                </div>
+
+                <div class="form-control md:col-span-2">
+                  <label class="label"><span class="label-text">User ID (Firebase)</span></label>
+                  <input type="text" [value]="currentUser()?.uid" class="input input-bordered font-mono text-xs"
+                    disabled />
+                </div>
+              </div>
+
+              <div class="divider">Zona de Peligro</div>
+
+              <div class="flex justify-between items-center">
+                <div>
+                  <h3 class="font-bold text-error">Cerrar Sesión</h3>
+                  <p class="text-xs opacity-60">Sal de tu cuenta en este dispositivo.</p>
+                </div>
+                <button (click)="logout()" class="btn btn-error btn-outline btn-sm">
+                  Cerrar Sesión
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

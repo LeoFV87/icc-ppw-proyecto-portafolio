@@ -3,9 +3,9 @@ import { Auth, user, signInWithPopup, GoogleAuthProvider, signOut, User } from '
 import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
 import { Observable, from, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, tap } from 'rxjs/operators'; // <--- Importamos tap
 
-// Definimos la interfaz aquí mismo para facilitar las cosas
+// Definimos la interfaz
 export type Role = 'admin' | 'programmer' | 'user';
 
 export interface UserProfile {
@@ -25,45 +25,58 @@ export class AuthService {
   private firestore = inject(Firestore);
   private router = inject(Router);
 
-  // Signals para manejar el estado en toda la app
+  // Signals para manejar el estado
   currentUser = signal<User | null>(null);
   userProfile = signal<UserProfile | null>(null);
 
-  // Observable del usuario de Firebase
-  user$ = user(this.auth);
+
+  loading = signal<boolean>(true);
+
+  user$ = user(this.auth).pipe(
+    tap((user) => {
+      this.loading.set(true);
+      this.currentUser.set(user);
+      if (user) {
+        // Si hay usuario, buscamos su perfil y luego apagamos loading
+        this.fetchUserProfile(user).then(() => this.loading.set(false));
+      } else {
+        // Si no hay usuario, limpiamos y apagamos loading
+        this.userProfile.set(null);
+        this.loading.set(false);
+      }
+    })
+  );
 
   constructor() {
-    // Escuchar cambios de autenticación y cargar el perfil de base de datos
-    this.user$.pipe(
-      switchMap(user => {
-        if (user) {
-          this.currentUser.set(user);
-          // Buscar el documento del usuario en Firestore
-          return getDoc(doc(this.firestore, 'users', user.uid));
-        } else {
-          this.currentUser.set(null);
-          this.userProfile.set(null);
-          return of(null);
-        }
-      })
-    ).subscribe(async (snapshot) => {
-      if (snapshot && snapshot.exists()) {
-        // Si existe el perfil, lo cargamos
-        this.userProfile.set(snapshot.data() as UserProfile);
-      } else if (this.currentUser()) {
-        // Si el usuario se loguea por primera vez, creamos su perfil base
-        const user = this.currentUser()!;
-        const newProfile: UserProfile = {
-          uid: user.uid,
-          email: user.email!,
-          displayName: user.displayName || '',
-          photoURL: user.photoURL || '',
-          role: 'user' // Rol por defecto
-        };
-        await setDoc(doc(this.firestore, 'users', user.uid), newProfile);
-        this.userProfile.set(newProfile);
-      }
-    });
+    // Suscribirse para que arranque el monitoreo
+    this.user$.subscribe();
+  }
+
+  // --- MÉTODOS PRIVADOS (Lógica extraída para que funcione el código de arriba) ---
+
+  private async fetchUserProfile(user: User) {
+    const userDocRef = doc(this.firestore, 'users', user.uid);
+    const snapshot = await getDoc(userDocRef);
+
+    if (snapshot.exists()) {
+      // Si existe, lo cargamos
+      this.userProfile.set(snapshot.data() as UserProfile);
+    } else {
+      // Si no existe, lo creamos (Lógica de registro automático)
+      await this.createUserProfile(user);
+    }
+  }
+
+  private async createUserProfile(user: User) {
+    const newProfile: UserProfile = {
+      uid: user.uid,
+      email: user.email!,
+      displayName: user.displayName || '',
+      photoURL: user.photoURL || '',
+      role: 'user' // Rol por defecto
+    };
+    await setDoc(doc(this.firestore, 'users', user.uid), newProfile);
+    this.userProfile.set(newProfile);
   }
 
   // --- Acciones de Autenticación ---
@@ -74,10 +87,10 @@ export class AuthService {
 
   logout() {
     return from(signOut(this.auth)).pipe(
-      switchMap(() => {
+      tap(() => {
         this.currentUser.set(null);
         this.userProfile.set(null);
-        return of(true);
+        this.router.navigate(['/auth/login']);
       })
     );
   }

@@ -1,1 +1,96 @@
-<p>admin-dashboard works!</p>
+<div class="min-h-screen bg-base-200 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto">
+
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-bold">Panel de Administración</h1>
+        <p class="text-base-content/60">Gestiona usuarios y permisos del sistema.</p>
+      </div>
+      <div class="badge badge-primary badge-lg">Modo Dios ⚡</div>
+    </div>
+
+    <div class="card bg-base-100 shadow-xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="table w-full">
+          <thead>
+            <tr class="bg-base-300">
+              <th>Usuario</th>
+              <th>Rol Actual</th>
+              <th>Cambiar Rol</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (user of users$ | async; track user.uid) {
+              <tr class="hover:bg-base-200/50 transition-colors">
+
+                <td>
+                  <div class="flex items-center gap-3">
+                    <div class="avatar">
+                      <div class="mask mask-squircle w-12 h-12 bg-base-300">
+                        <img [src]="user.photoURL || 'https://ui-avatars.com/api/?name=' + user.email"
+                             alt="Avatar"
+                             referrerpolicy="no-referrer"/>
+                      </div>
+                    </div>
+                    <div>
+                      <div class="font-bold">{{ user.displayName || 'Sin nombre' }}</div>
+                      <div class="text-sm opacity-50">{{ user.email }}</div>
+                    </div>
+                  </div>
+                </td>
+
+                <td>
+                  <div class="badge badge-lg gap-2"
+                       [ngClass]="{
+                         'badge-primary': user.role === 'admin',
+                         'badge-secondary': user.role === 'programmer',
+                         'badge-ghost': user.role === 'user' || !user.role
+                       }">
+                    {{ user.role || 'USER' | uppercase }}
+                  </div>
+                </td>
+
+                <td>
+                  <div class="join">
+                    <button (click)="changeRole(user.uid, 'user')"
+                            class="btn btn-xs join-item btn-ghost"
+                            [disabled]="user.role === 'user'"
+                            title="Degradar a Usuario">
+                      👤
+                    </button>
+                    <button (click)="changeRole(user.uid, 'programmer')"
+                            class="btn btn-xs join-item btn-secondary btn-outline"
+                            [disabled]="user.role === 'programmer'"
+                            title="Ascender a Programador">
+                      💻 Dev
+                    </button>
+                    <button (click)="changeRole(user.uid, 'admin')"
+                            class="btn btn-xs join-item btn-primary btn-outline"
+                            [disabled]="user.role === 'admin'"
+                            title="Hacer Administrador">
+                      ⚡ Admin
+                    </button>
+                  </div>
+                </td>
+
+                <th>
+                  <button class="btn btn-ghost btn-xs">Detalles</button>
+                </th>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="4" class="text-center py-8 opacity-50">
+                  Cargando usuarios o no hay datos...
+                </td>
+              </tr>
+            }
+          </tbody>
+
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
