@@ -1,60 +1,105 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms'; // Necesario para el buscador
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { Firestore, collection, query, where, collectionData } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
+import { AuthService } from '../../../../core/services/firebase/auth';
+import { AdvisoryService } from '../../../../core/services/advisory/advisory';
+
 
 interface Programmer {
-  id: string;
-  name: string;
+  uid: string;
+  displayName: string;
   role: string;
-  image: string;
-  skills: string[];
-  description: string;
+  photoURL: string;
+  description?: string;
+  skills?: string[];
+  // IMPORTANTE: Agregamos esto para que TypeScript sepa que el programador tiene horarios
+  availability?: string[];
 }
 
 @Component({
-  selector: 'app-explorar',
+  selector: 'explorar',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './explorar.html'
-
+  templateUrl: './explorar.html' // Asegúrate que tu archivo se llame así
 })
 export class Explorar {
-  searchTerm = signal('');
+  private firestore = inject(Firestore);
+  private authService = inject(AuthService);
+  private advisoryService = inject(AdvisoryService);
 
-  // Datos de ejemplo (Mock Data) para ver la interfaz lista
-  programmers = signal<Programmer[]>([
-    {
-      id: '1',
-      name: 'Leo Vasconez',
-      role: 'Full Stack Developer',
-      image: 'https://ui-avatars.com/api/?name=Leo+Vasconez&background=0D8ABC&color=fff&size=400',
-      skills: ['Angular', 'Firebase', 'Node.js', 'Tailwind'],
-      description: 'Arquitecto de software enfocado en escalabilidad y backend robusto.'
-    },
-    {
-      id: '2',
-      name: 'Michelle Morocho',
-      role: 'Frontend Engineer',
-      image: 'https://ui-avatars.com/api/?name=Michelle+Morocho&background=D926A9&color=fff&size=400',
-      skills: ['UX/UI', 'React', 'Angular', 'Figma'],
-      description: 'Especialista en interfaces interactivas y accesibilidad web.'
-    },
-    {
-      id: '3',
-      name: 'Dev Example',
-      role: 'Backend Developer',
-      image: 'https://ui-avatars.com/api/?name=Dev+Example&background=random&size=400',
-      skills: ['Python', 'Django', 'PostgreSQL'],
-      description: 'Experto en APIs RESTful y seguridad de datos.'
+  currentUser = this.authService.currentUser;
+  userProfile = this.authService.userProfile;
+
+  programmers$: Observable<Programmer[]>;
+
+  // Estado para el Modal
+  selectedProgrammer = signal<Programmer | null>(null);
+  requestTopic = signal('');
+  requestMessage = signal('');
+
+  //Señal del horario
+  selectedSlot = signal('');
+
+  isModalOpen = signal(false);
+
+  constructor() {
+    const usersRef = collection(this.firestore, 'users');
+    const q = query(usersRef, where('role', '==', 'programmer'));
+    this.programmers$ = collectionData(q, { idField: 'uid' }) as Observable<Programmer[]>;
+  }
+
+  openRequestModal(dev: Programmer) {
+    if (!this.currentUser()) {
+      alert('Debes iniciar sesión para solicitar una asesoría.');
+      return;
     }
-  ]);
+    this.selectedProgrammer.set(dev);
 
-  // Filtro simple
-  get filteredProgrammers() {
-    return this.programmers().filter(p =>
-      p.name.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
-      p.skills.some(s => s.toLowerCase().includes(this.searchTerm().toLowerCase()))
-    );
+
+    this.selectedSlot.set('');
+
+    this.isModalOpen.set(true);
+  }
+
+  closeModal() {
+    this.isModalOpen.set(false);
+    this.selectedProgrammer.set(null);
+    this.requestTopic.set('');
+    this.requestMessage.set('');
+    this.selectedSlot.set('');
+  }
+
+  async sendRequest() {
+    const user = this.currentUser();
+    const dev = this.selectedProgrammer();
+
+
+    if (user && dev && this.requestTopic() && this.selectedSlot()) {
+      try {
+        await this.advisoryService.requestAdvisory({
+          clientId: user.uid,
+          clientName: user.displayName || 'Usuario',
+          clientEmail: user.email || '',
+          programmerId: dev.uid,
+          programmerName: dev.displayName,
+          topic: this.requestTopic(),
+          message: this.requestMessage(),
+
+
+          timeSlot: this.selectedSlot()
+        });
+
+        alert('✅ Solicitud enviada con éxito');
+        this.closeModal();
+      } catch (error) {
+        console.error(error);
+        alert('Error al enviar solicitud');
+      }
+    } else {
+        alert('Por favor completa todos los campos obligatorios (Tema y Horario)');
+    }
   }
 }

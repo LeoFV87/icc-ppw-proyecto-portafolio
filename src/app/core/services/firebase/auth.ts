@@ -101,3 +101,5 @@ export class AuthService {
     return this.userProfile()?.role === role;
   }
 }
+
+export { Auth };

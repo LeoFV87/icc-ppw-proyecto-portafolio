@@ -1,1 +1,53 @@
-<p>advisories works!</p>
+<div class="p-6">
+  <h1 class="text-3xl font-bold mb-6">📬 Solicitudes de Asesoría</h1>
+
+  <div class="grid gap-6">
+    @for (req of requests$ | async; track req.id) {
+      <div class="card bg-base-100 shadow-lg border border-base-200">
+        <div class="card-body">
+
+          <div class="flex justify-between items-start">
+            <div>
+              <h2 class="card-title text-xl text-primary">{{ req.topic }}</h2>
+              <p class="text-sm font-bold mt-1">De: {{ req.clientName }} <span class="font-normal opacity-70">({{ req.clientEmail }})</span></p>
+            </div>
+            <div class="badge badge-lg"
+                 [ngClass]="{
+                   'badge-warning': req.status === 'pending',
+                   'badge-success': req.status === 'accepted',
+                   'badge-error': req.status === 'rejected'
+                 }">
+              {{ req.status | uppercase }}
+            </div>
+          </div>
+
+          <div class="bg-base-200 p-4 rounded-lg my-4 text-sm italic opacity-80">
+            "{{ req.message || 'Sin mensaje adjunto.' }}"
+          </div>
+
+          <p class="text-xs opacity-50 mb-4">Recibido: {{ req.createdAt.seconds * 1000 | date:'medium' }}</p>
+
+          @if (req.status === 'pending') {
+            <div class="card-actions justify-end gap-3">
+              <button (click)="respondRequest(req, 'rejected')" class="btn btn-error btn-outline btn-sm">
+                Rechazar
+              </button>
+              <button (click)="respondRequest(req, 'accepted')" class="btn btn-success btn-sm text-white">
+                ✅ Aceptar Cita
+              </button>
+            </div>
+          } @else {
+            <div class="text-right text-sm opacity-60 font-semibold">
+              Esta solicitud ya fue gestionada.
+            </div>
+          }
+
+        </div>
+      </div>
+    } @empty {
+      <div class="text-center py-12 opacity-50">
+        <p class="text-xl">No tienes solicitudes pendientes por ahora. 😴</p>
+      </div>
+    }
+  </div>
+</div>

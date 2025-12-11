@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { ProfileSettings } from './modules/auth/pages/profile-settings/profile-settings';
 import { programmerGuard } from './core/guards/programmer-guard';
 import { adminGuard } from './core/guards/admin-guard';
+import { UserDashboard } from './modules/user/pages/user-dashboard/user-dashboard';
+import { userGuard } from './core/guards/user-guard';
 
 export const routes: Routes = [
 
@@ -22,6 +24,11 @@ export const routes: Routes = [
   {
     path: 'perfil',
     component: ProfileSettings
+  },
+  {
+  path: 'mis-asesorias',
+  component: UserDashboard,
+  canActivate: [userGuard]
   },
 
   { path: '**', redirectTo: '' }

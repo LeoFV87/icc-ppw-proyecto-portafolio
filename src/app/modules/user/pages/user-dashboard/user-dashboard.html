@@ -1,0 +1,39 @@
+<div class="min-h-screen bg-base-200 p-4 md:p-8">
+  <div class="max-w-5xl mx-auto">
+    <h1 class="text-3xl font-bold mb-2">👋 Mis Solicitudes</h1>
+    <p class="opacity-60 mb-8">Historial de tus peticiones de asesoría.</p>
+
+    <div class="grid gap-4">
+      @for (req of myAdvisories$ | async; track req.id) {
+        <div class="card bg-base-100 shadow-md border-l-4"
+             [ngClass]="{
+               'border-warning': req.status === 'pending',
+               'border-success': req.status === 'accepted',
+               'border-error': req.status === 'rejected'
+             }">
+          <div class="card-body flex-row justify-between items-center p-6">
+            <div>
+              <h2 class="font-bold text-lg">{{ req.topic }}</h2>
+              <p class="text-sm opacity-70">Programador: <span class="font-semibold">{{ req.programmerName }}</span></p>
+              <p class="text-xs mt-1">{{ req.createdAt.seconds * 1000 | date:'medium' }}</p>
+            </div>
+
+            <div class="badge badge-lg"
+                 [ngClass]="{
+                   'badge-warning': req.status === 'pending',
+                   'badge-success': req.status === 'accepted',
+                   'badge-error': req.status === 'rejected'
+                 }">
+              {{ req.status | uppercase }}
+            </div>
+          </div>
+        </div>
+      } @empty {
+        <div class="text-center py-10">
+          <p class="text-lg">No has solicitado ninguna asesoría aún.</p>
+          <a routerLink="/explorar" class="btn btn-primary btn-sm mt-4">Ir a Explorar</a>
+        </div>
+      }
+    </div>
+  </div>
+</div>

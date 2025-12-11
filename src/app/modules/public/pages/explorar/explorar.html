@@ -1,56 +1,97 @@
 <div class="min-h-screen bg-base-100 py-10 px-4">
   <div class="max-w-7xl mx-auto">
 
-    <div class="text-center mb-12 animate-fade-in-up">
+    <div class="text-center mb-12">
       <h1 class="text-4xl font-black mb-4">Explora nuestro Talento</h1>
-      <p class="text-base-content/60 mb-8">Encuentra al desarrollador perfecto para tu próximo proyecto.</p>
-
-      <div class="join w-full max-w-lg shadow-lg">
-        <input
-          type="text"
-          placeholder="Buscar por nombre o habilidad (ej: Angular)..."
-          class="input input-bordered join-item w-full bg-base-200 focus:bg-base-100 transition-colors"
-          [(ngModel)]="searchTerm"
-        />
-        <button class="btn btn-primary join-item">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-        </button>
-      </div>
+      <p class="text-base-content/60">Datos en tiempo real de nuestros programadores.</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
-      @for (dev of filteredProgrammers; track dev.id) {
-        <div class="card bg-base-100 shadow-xl border border-base-200 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group">
-          <figure class="h-48 overflow-hidden relative">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
-            <img [src]="dev.image" [alt]="dev.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-            <div class="absolute bottom-4 left-4 z-20 text-white">
-              <h2 class="card-title text-xl drop-shadow-md">{{ dev.name }}</h2>
-              <div class="badge badge-primary badge-sm border-none">{{ dev.role }}</div>
-            </div>
+      @for (dev of programmers$ | async; track dev.uid) {
+        <div class="card bg-base-100 shadow-xl border border-base-200 hover:-translate-y-1 transition-all duration-300">
+          <figure class="h-48 overflow-hidden relative bg-base-300">
+            <img [src]="dev.photoURL || 'https://ui-avatars.com/api/?name=' + dev.displayName"
+                 referrerpolicy="no-referrer"
+                 class="w-full h-full object-cover" />
           </figure>
 
           <div class="card-body">
-            <p class="text-sm opacity-70 line-clamp-2 h-10">{{ dev.description }}</p>
+            <h2 class="card-title">{{ dev.displayName }}</h2>
+            <div class="badge badge-secondary badge-outline">{{ dev.role | uppercase }}</div>
+            <p class="text-sm opacity-70 line-clamp-2">
+              {{ dev.description || 'Programador listo para ayudarte.' }}
+            </p>
 
-            <div class="flex flex-wrap gap-2 my-3">
-              @for (skill of dev.skills; track skill) {
-                <div class="badge badge-outline badge-sm">{{ skill }}</div>
+            <div class="card-actions justify-end mt-4">
+              @if (userProfile()?.role !== 'programmer') {
+                <button (click)="openRequestModal(dev)" class="btn btn-primary btn-sm">
+                  📅 Solicitar Asesoría
+                </button>
+              } @else {
+                <div class="badge badge-ghost opacity-50 cursor-not-allowed p-3">
+                  Colega Programador 👨‍💻
+                </div>
               }
-            </div>
-
-            <div class="card-actions justify-end mt-2">
-              <button class="btn btn-sm btn-ghost hover:bg-primary/10 hover:text-primary">Ver Perfil Completo →</button>
             </div>
           </div>
         </div>
       } @empty {
         <div class="col-span-full text-center py-20 opacity-50">
-          <p class="text-xl">No encontramos programadores con esa búsqueda 😢</p>
+          <p>No hay programadores disponibles aún.</p>
         </div>
       }
-
     </div>
   </div>
+
+  @if (isModalOpen()) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+      <div class="card w-full max-w-lg bg-base-100 shadow-2xl animate-fade-in-up">
+        <div class="card-body">
+          <h3 class="font-bold text-lg">Solicitar Asesoría a {{ selectedProgrammer()?.displayName }}</h3>
+
+          <div class="form-control w-full mt-4">
+            <label class="label">
+              <span class="label-text font-bold text-primary">Selecciona un Horario *</span>
+            </label>
+
+            @let slots = $any(selectedProgrammer())?.availability;
+
+            @if (slots && slots.length > 0) {
+              <select [(ngModel)]="selectedSlot" class="select select-bordered w-full">
+                <option disabled selected value="">-- Elige una opción --</option>
+                @for (slot of slots; track slot) {
+                  <option [value]="slot">{{ slot }}</option>
+                }
+              </select>
+            } @else {
+              <div class="alert alert-warning text-sm flex gap-2">
+                <span>⚠️</span>
+                <span>Este programador aún no ha configurado sus horarios disponibles.</span>
+              </div>
+            }
+          </div>
+
+          <div class="form-control w-full mt-4">
+            <label class="label"><span class="label-text">Tema de la Asesoría *</span></label>
+            <input type="text" [(ngModel)]="requestTopic" placeholder="Ej: Revisión de código Angular..." class="input input-bordered w-full" />
+          </div>
+
+          <div class="form-control w-full mt-4">
+            <label class="label"><span class="label-text">Mensaje (Opcional)</span></label>
+            <textarea [(ngModel)]="requestMessage" class="textarea textarea-bordered h-24" placeholder="Detalles adicionales..."></textarea>
+          </div>
+
+          <div class="card-actions justify-end mt-6">
+            <button class="btn btn-ghost" (click)="closeModal()">Cancelar</button>
+
+            <button class="btn btn-primary"
+                    (click)="sendRequest()"
+                    [disabled]="!requestTopic() || !selectedSlot()">
+              Enviar Solicitud
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 </div>

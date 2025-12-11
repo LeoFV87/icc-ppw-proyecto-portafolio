@@ -1,9 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { ProgrammerDashboard } from './pages/programmer-dashboard/programmer-dashboard';
-import { Advisories } from './pages/advisories/advisories';
+
 import { Profile } from './pages/profile/profile';
 import { MyProjects } from './pages/my-projects/my-projects';
+import { Advisories } from './pages/advisories/advisories';
+import { Schedule } from './pages/schedule/schedule';
 
 const routes: Routes = [
   {
@@ -26,6 +28,10 @@ const routes: Routes = [
   {
     path: 'asesorias', // Ruta: /programmer/asesorias
     component: Advisories
+  },
+  {
+    path: 'horarios', // Ruta: /programmer/asesorias
+    component: Schedule
   }
 ];
 
