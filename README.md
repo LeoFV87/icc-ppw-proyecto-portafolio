@@ -1,6 +1,6 @@
 
 # Universidad Politecnica Salesiana
-![Logo Institucional](https://muchomejorecuador.org.ec/wp-content/uploads/2023/06/UPS.jpg)  
+![Logo Institucional](https://upload.wikimedia.org/wikipedia/commons/b/b0/Logo_Universidad_Polit%C3%A9cnica_Salesiana_del_Ecuador.png)  
 
 ---
 
@@ -22,12 +22,12 @@ El proyecto utiliza una arquitectura **Serverless** moderna basada en:
 
 ### **Frontend: Angular 18**
 * **Signals & Standalone Components:** Gestión de estado reactivo y modularidad moderna.
-* **TailwindCSS + DaisyUI:** Con esto podemos hacer el diseño de interfaz responsivo y tambien de componentes visuales como modales, Cards, Tablas.
+* **TailwindCSS + DaisyUI:** Con Tailwind y DaisiUI podemos hacer el diseño de interfaz responsivo y aparte de componentes visuales como modales, cards, tablas, etc.
 
 ### **Backend y Servicios: Firebase**
-* **Authentication:** Inicio de sesión seguro el cual lo realizamos con Google o Correo/Contraseña.
-* **Firestore Database:** Es una base de datos NoSQL en tiempo real para gestionar usuarios, proyectos y solicitudes.
-* **Hosting:** Se realiza el despliegue de la aplicación SPA.
+* **Authentication:** Inicio de sesión seguro el cual lo realizamos con Google o tambien se puede realizar usando el método Correo/Contraseña.
+* **Firestore Database:** Es una base de datos NoSQL en tiempo real que nos sirve para poder gestionar usuarios, proyectos y solicitudes.
+* **Hosting:** Este host del sitio se realiza desplegando la aplicación SPA.
 
 ---
 
@@ -55,13 +55,13 @@ Este sistema resuelve la necesidad que hay de validar y de organizar la experien
 ### 👤 Usuario General
 * **Exploración:** Tiene la capacidad de poder realizar la búsqueda de programadores en la sección "Explorar".
 * **Solicitudes:** Posee tambien la capacidad de solicitar asesorias seleccionando horarios disponibles.
-* **Visualización:** El usuario puede ver los detalles completos de los proyectos y demos.
+* **Visualización:** El usuario puede ver los detalles completos esto incluye a los proyectos y tambien los demos.
 
 ---
 
 ## 📱 Módulos y Pantallas
 
-1.  **Home / Landing:** El home contiene la vista de bienvenida con todos los programadores registrados.
+1.  **Home / Landing:** El home contiene la vista de bienvenida y aparte contiene todos los programadores/creadores del sitio.
 2.  **Auth (Login/Register):** Es un sistema de autenticación que contiene validaciones.
 3.  **Panel Admin:** Es una tabla la cual nos permite la gestión de usuarios con acciones rápidas.
 4.  **Mi Portafolio (Programador):** CRUD de proyectos con modal de edición.
