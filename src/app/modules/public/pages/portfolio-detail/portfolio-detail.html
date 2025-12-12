@@ -1,1 +1,122 @@
-<p>portfolio-detail works!</p>
+<div class="min-h-screen bg-base-200">
+
+  <div class="bg-base-100 shadow-md pb-8 pt-12 px-4 text-center">
+    <div class="avatar mb-4">
+      <div class="w-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+        <img [src]="programmerData()?.photoURL || 'https://ui-avatars.com/api/?name=' + programmerData()?.displayName"
+             referrerpolicy="no-referrer"
+             alt="Foto de perfil"
+             class="object-cover"/>
+      </div>
+    </div>
+    <h1 class="text-4xl font-bold">{{ programmerData()?.displayName }}</h1>
+    <p class="text-xl opacity-60 mt-2">{{ programmerData()?.role | uppercase }}</p>
+
+    <div class="flex justify-center gap-4 mt-4">
+      @if (programmerData()?.github) {
+        <a [href]="programmerData()?.github" target="_blank" class="btn btn-circle btn-outline" title="GitHub">
+          <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" class="w-6 h-6" alt="GH">
+        </a>
+      }
+      @if (programmerData()?.linkedin) {
+        <a [href]="programmerData()?.linkedin" target="_blank" class="btn btn-circle btn-outline btn-primary" title="LinkedIn">
+          <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png" class="w-6 h-6" alt="LI">
+        </a>
+      }
+    </div>
+
+    <div class="max-w-2xl mx-auto mt-6">
+      <p class="text-lg">{{ programmerData()?.description || 'Este programador aún no ha agregado una biografía.' }}</p>
+    </div>
+
+    <div class="flex flex-wrap gap-2 justify-center mt-6">
+      @for (skill of programmerData()?.skills; track skill) {
+        <span class="badge badge-lg badge-ghost font-bold">{{ skill }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto p-8 space-y-16">
+
+    <section>
+      <h2 class="text-3xl font-bold mb-8 flex items-center gap-3 border-b pb-4 border-secondary/20">
+        💼 Proyectos Laborales / Profesionales
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        @for (proj of laboralProjects$ | async; track proj.id) {
+          <div class="card bg-base-100 shadow-xl hover:-translate-y-2 transition-transform duration-300 flex flex-col h-full">
+            <figure class="h-56 overflow-hidden relative group">
+               <img [src]="proj.imageUrl" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Project Image" />
+               <div class="absolute top-2 right-2 badge badge-secondary font-bold shadow-sm">💼 Profesional</div>
+            </figure>
+            <div class="card-body flex-1">
+               <div class="flex justify-between items-start gap-2">
+                 <h3 class="card-title text-xl leading-tight">{{ proj.title }}</h3>
+                 <div class="badge badge-secondary badge-outline text-xs whitespace-nowrap">{{ proj.role }}</div>
+               </div>
+
+               <p class="text-sm opacity-70 line-clamp-3 mt-2 flex-1">{{ proj.description }}</p>
+
+               <div class="flex flex-wrap gap-1 mt-4">
+                 @for (tech of proj.technologies; track tech) {
+                   <span class="badge badge-xs badge-ghost">{{ tech }}</span>
+                 }
+               </div>
+
+               <div class="card-actions justify-end mt-6">
+                 @if (proj.repoUrl) { <a [href]="proj.repoUrl" target="_blank" class="btn btn-sm btn-outline">Código</a> }
+                 @if (proj.demoUrl) { <a [href]="proj.demoUrl" target="_blank" class="btn btn-sm btn-primary">Ver Demo</a> }
+               </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="col-span-full py-12 text-center opacity-50 bg-base-100 rounded-xl border-2 border-dashed border-base-300">
+            <p class="text-xl">No hay proyectos laborales registrados.</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-3xl font-bold mb-8 flex items-center gap-3 border-b pb-4 border-primary/20">
+        📚 Proyectos Académicos
+      </h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        @for (proj of academicProjects$ | async; track proj.id) {
+          <div class="card bg-base-100 shadow-xl hover:-translate-y-2 transition-transform duration-300 flex flex-col h-full">
+            <figure class="h-56 overflow-hidden relative group">
+               <img [src]="proj.imageUrl" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="Project Image" />
+               <div class="absolute top-2 right-2 badge badge-primary font-bold shadow-sm">📚 Académico</div>
+            </figure>
+            <div class="card-body flex-1">
+               <div class="flex justify-between items-start gap-2">
+                 <h3 class="card-title text-xl leading-tight">{{ proj.title }}</h3>
+                 <div class="badge badge-primary badge-outline text-xs whitespace-nowrap">{{ proj.role }}</div>
+               </div>
+
+               <p class="text-sm opacity-70 line-clamp-3 mt-2 flex-1">{{ proj.description }}</p>
+
+               <div class="flex flex-wrap gap-1 mt-4">
+                 @for (tech of proj.technologies; track tech) {
+                   <span class="badge badge-xs badge-ghost">{{ tech }}</span>
+                 }
+               </div>
+
+               <div class="card-actions justify-end mt-6">
+                 @if (proj.repoUrl) { <a [href]="proj.repoUrl" target="_blank" class="btn btn-sm btn-outline">Código</a> }
+                 @if (proj.demoUrl) { <a [href]="proj.demoUrl" target="_blank" class="btn btn-sm btn-primary">Ver Demo</a> }
+               </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="col-span-full py-12 text-center opacity-50 bg-base-100 rounded-xl border-2 border-dashed border-base-300">
+            <p class="text-xl">No hay proyectos académicos registrados.</p>
+          </div>
+        }
+      </div>
+    </section>
+
+  </div>
+</div>

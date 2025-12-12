@@ -2,11 +2,63 @@
   <div class="text-center mb-8">
     <div class="avatar mb-4">
       <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-        <img [src]="currentUser()?.photoURL" referrerpolicy="no-referrer"/>
+        <img [src]="photoInput() || currentUser()?.photoURL || 'https://ui-avatars.com/api/?name=' + currentUser()?.displayName"
+             referrerpolicy="no-referrer"/>
       </div>
     </div>
+
     <h2 class="text-2xl font-bold">{{ currentUser()?.displayName }}</h2>
-    <div class="badge badge-secondary mt-2">PROGRAMADOR</div>
+
+    <div class="badge badge-secondary mt-2 font-bold uppercase">
+      {{ specialty() || 'PROGRAMADOR' }}
+    </div>
+  </div>
+
+  <div class="form-control w-full mb-4">
+    <label class="label"><span class="label-text font-bold">Título / Especialidad</span></label>
+    <input
+      type="text"
+      [ngModel]="specialty()"
+      (ngModelChange)="specialty.set($event)"
+      placeholder="Ej: Full Stack Developer, Arquitecto de Software..."
+      class="input input-bordered w-full"
+    />
+  </div>
+
+  <div class="form-control w-full mb-4">
+    <label class="label"><span class="label-text font-bold">Foto de Perfil (URL)</span></label>
+    <input
+      type="text"
+      [ngModel]="photoInput()"
+      (ngModelChange)="photoInput.set($event)"
+      placeholder="https://..."
+      class="input input-bordered w-full"
+    />
+    <label class="label"><span class="label-text-alt">Pega aquí el enlace de tu imagen</span></label>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+    <div class="form-control w-full">
+      <label class="label"><span class="label-text font-bold">LinkedIn (URL)</span></label>
+      <input
+        type="text"
+        [ngModel]="linkedin()"
+        (ngModelChange)="linkedin.set($event)"
+        placeholder="https://linkedin.com/in/..."
+        class="input input-bordered w-full"
+      />
+    </div>
+
+    <div class="form-control w-full">
+      <label class="label"><span class="label-text font-bold">GitHub (URL)</span></label>
+      <input
+        type="text"
+        [ngModel]="github()"
+        (ngModelChange)="github.set($event)"
+        placeholder="https://github.com/..."
+        class="input input-bordered w-full"
+      />
+    </div>
   </div>
 
   <div class="form-control w-full mb-4">

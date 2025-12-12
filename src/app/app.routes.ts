@@ -4,6 +4,7 @@ import { programmerGuard } from './core/guards/programmer-guard';
 import { adminGuard } from './core/guards/admin-guard';
 import { UserDashboard } from './modules/user/pages/user-dashboard/user-dashboard';
 import { userGuard } from './core/guards/user-guard';
+import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
 
@@ -23,7 +24,8 @@ export const routes: Routes = [
 
   {
     path: 'perfil',
-    component: ProfileSettings
+    component: ProfileSettings,
+    canActivate: [authGuard]
   },
   {
   path: 'mis-asesorias',

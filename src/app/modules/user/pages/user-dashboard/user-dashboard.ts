@@ -18,10 +18,11 @@ export class UserDashboard {
   private advisoryService = inject(AdvisoryService);
   private authService = inject(AuthService);
 
-
   myAdvisories$ = toObservable(this.authService.currentUser).pipe(
     switchMap(user => {
-      if (user) return this.advisoryService.getClientAdvisories(user.uid);
+      if (user) {
+        return this.advisoryService.getClientAdvisories(user.uid);
+      }
       return of([]);
     })
   );

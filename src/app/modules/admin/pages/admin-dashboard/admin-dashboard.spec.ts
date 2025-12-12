@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { AdminDashboard } from './admin-dashboard';
+import { Firestore } from '@angular/fire/firestore';
 
 describe('AdminDashboard', () => {
   let component: AdminDashboard;
@@ -8,7 +8,11 @@ describe('AdminDashboard', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminDashboard]
+      imports: [AdminDashboard],
+
+      providers: [
+        { provide: Firestore, useValue: {} }
+      ]
     })
     .compileComponents();
 

@@ -1,13 +1,14 @@
-export interface User {
+export type Role = 'admin' | 'programmer' | 'user';
+
+export interface UserProfile {
   uid: string;
   email: string;
-  displayName: string;
+  role: Role;
+  displayName?: string;
   photoURL?: string;
-  role: 'admin' | 'programmer' | 'user';
-  specialty?: string;
   description?: string;
-  socialLinks?: {
-    github?: string;
-    linkedin?: string;
-  };
+  skills?: string[];
+  // === NUEVO: Redes Sociales (Directas) ===
+  github?: string;
+  linkedin?: string;
 }

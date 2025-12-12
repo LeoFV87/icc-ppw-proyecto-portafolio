@@ -15,6 +15,7 @@ export interface AdvisoryRequest {
   timeSlot: string;
   status: 'pending' | 'accepted' | 'rejected';
   createdAt: Timestamp;
+  replyMessage?: string;
 }
 
 @Injectable({
@@ -48,4 +49,14 @@ export class AdvisoryService {
     const advisoryRef = doc(this.firestore, `advisories/${advisoryId}`);
     await updateDoc(advisoryRef, { status: newStatus });
   }
+
+
+  async respondAdvisory(id: string, status: 'accepted' | 'rejected', replyMessage: string) {
+    const ref = doc(this.firestore, `advisories/${id}`);
+    return updateDoc(ref, {
+      status,
+      replyMessage
+    });
+  }
+
 }

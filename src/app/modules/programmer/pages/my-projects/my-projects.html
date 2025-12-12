@@ -1,1 +1,102 @@
-<p>my-projects works!</p>
+<div class="p-6 max-w-6xl mx-auto">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold">📂 Mis Proyectos</h1>
+    <button (click)="openNewModal()" class="btn btn-primary">+ Nuevo Proyecto</button>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @for (proj of myProjects$ | async; track proj.id) {
+      <div class="card bg-base-100 shadow-xl image-full group">
+        <figure><img [src]="proj.imageUrl" alt="Project" /></figure>
+        <div class="card-body">
+          <h2 class="card-title">
+            {{ proj.title }}
+            <div class="badge badge-sm" [ngClass]="proj.type === 'laboral' ? 'badge-secondary' : 'badge-primary'">
+              {{ proj.type === 'laboral' ? '💼' : '📚' }}
+            </div>
+          </h2>
+          <p class="line-clamp-2">{{ proj.description }}</p>
+
+          <div class="card-actions justify-end mt-4 gap-2">
+            <button (click)="openEditModal(proj)" class="btn btn-info btn-xs text-white">
+              ✏️ Editar
+            </button>
+
+            <button (click)="deleteProject(proj.id!)" class="btn btn-error btn-xs">
+              🗑️ Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="col-span-full text-center py-10 opacity-50">
+        <p>No tienes proyectos aún. ¡Sube el primero!</p>
+      </div>
+    }
+  </div>
+
+  <dialog id="my_modal_3" class="modal">
+    <div class="modal-box w-11/12 max-w-2xl">
+      <form method="dialog">
+        <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+      </form>
+
+      <h3 class="font-bold text-lg mb-4">
+        @if (editingId()) { ✏️ Editar Proyecto } @else { 🚀 Agregar Nuevo Proyecto }
+      </h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="form-control">
+          <label class="label"><span class="label-text">Título *</span></label>
+          <input type="text" [ngModel]="title()" (ngModelChange)="title.set($event)" class="input input-bordered" />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">URL de Imagen *</span></label>
+          <input type="text" [ngModel]="imgUrl()" (ngModelChange)="imgUrl.set($event)" class="input input-bordered" />
+        </div>
+
+        <div class="form-control md:col-span-2">
+          <label class="label"><span class="label-text">Descripción *</span></label>
+          <textarea [ngModel]="desc()" (ngModelChange)="desc.set($event)" class="textarea textarea-bordered h-24"></textarea>
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Tipo de Proyecto *</span></label>
+          <select [ngModel]="projectType()" (ngModelChange)="projectType.set($event)" class="select select-bordered w-full">
+            <option value="academico">📚 Académico</option>
+            <option value="laboral">💼 Laboral / Profesional</option>
+          </select>
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Tu Rol *</span></label>
+          <input type="text" [ngModel]="projectRole()" (ngModelChange)="projectRole.set($event)" class="input input-bordered" />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Repo GitHub</span></label>
+          <input type="text" [ngModel]="repo()" (ngModelChange)="repo.set($event)" class="input input-bordered" />
+        </div>
+
+        <div class="form-control">
+          <label class="label"><span class="label-text">Demo URL</span></label>
+          <input type="text" [ngModel]="demo()" (ngModelChange)="demo.set($event)" class="input input-bordered" />
+        </div>
+
+        <div class="form-control md:col-span-2">
+          <label class="label"><span class="label-text">Tecnologías (separadas por comas)</span></label>
+          <input type="text" [ngModel]="techInput()" (ngModelChange)="techInput.set($event)" class="input input-bordered" />
+        </div>
+      </div>
+
+      <div class="modal-action">
+        <form method="dialog">
+          <button (click)="saveProject()" class="btn btn-primary">
+            @if (editingId()) { Actualizar Proyecto } @else { Guardar Proyecto }
+          </button>
+        </form>
+      </div>
+    </div>
+  </dialog>
+</div>

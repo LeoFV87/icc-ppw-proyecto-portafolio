@@ -23,68 +23,72 @@
 
           <tbody>
             @for (user of users$ | async; track user.uid) {
-              <tr class="hover:bg-base-200/50 transition-colors">
+            <tr class="hover:bg-base-200/50 transition-colors">
 
-                <td>
-                  <div class="flex items-center gap-3">
-                    <div class="avatar">
-                      <div class="mask mask-squircle w-12 h-12 bg-base-300">
-                        <img [src]="user.photoURL || 'https://ui-avatars.com/api/?name=' + user.email"
-                             alt="Avatar"
-                             referrerpolicy="no-referrer"/>
-                      </div>
-                    </div>
-                    <div>
-                      <div class="font-bold">{{ user.displayName || 'Sin nombre' }}</div>
-                      <div class="text-sm opacity-50">{{ user.email }}</div>
+              <td>
+                <div class="flex items-center gap-3">
+                  <div class="avatar">
+                    <div class="mask mask-squircle w-12 h-12 bg-base-300">
+                      <img [src]="user.photoURL || 'https://ui-avatars.com/api/?name=' + user.email" alt="Avatar"
+                        referrerpolicy="no-referrer" />
                     </div>
                   </div>
-                </td>
+                  <div>
+                    <div class="font-bold">{{ user.displayName || 'Sin nombre' }}</div>
+                    <div class="text-sm opacity-50">{{ user.email }}</div>
+                  </div>
+                </div>
+              </td>
 
-                <td>
-                  <div class="badge badge-lg gap-2"
-                       [ngClass]="{
+              <td>
+                <div class="badge badge-lg gap-2" [ngClass]="{
                          'badge-primary': user.role === 'admin',
                          'badge-secondary': user.role === 'programmer',
                          'badge-ghost': user.role === 'user' || !user.role
                        }">
-                    {{ user.role || 'USER' | uppercase }}
-                  </div>
-                </td>
+                  {{ user.role || 'USER' | uppercase }}
+                </div>
+              </td>
 
-                <td>
-                  <div class="join">
-                    <button (click)="changeRole(user.uid, 'user')"
-                            class="btn btn-xs join-item btn-ghost"
-                            [disabled]="user.role === 'user'"
-                            title="Degradar a Usuario">
-                      👤
-                    </button>
-                    <button (click)="changeRole(user.uid, 'programmer')"
-                            class="btn btn-xs join-item btn-secondary btn-outline"
-                            [disabled]="user.role === 'programmer'"
-                            title="Ascender a Programador">
-                      💻 Dev
-                    </button>
-                    <button (click)="changeRole(user.uid, 'admin')"
-                            class="btn btn-xs join-item btn-primary btn-outline"
-                            [disabled]="user.role === 'admin'"
-                            title="Hacer Administrador">
-                      ⚡ Admin
-                    </button>
-                  </div>
-                </td>
+              <td>
+                <div class="join">
 
-                <th>
-                  <button class="btn btn-ghost btn-xs">Detalles</button>
-                </th>
-              </tr>
+                  <button (click)="changeRole(user.uid, 'user')" class="btn btn-xs join-item btn-warning btn-outline"
+                    [disabled]="user.role === 'user' || !user.role || user.uid === SUPER_ADMIN_UID"
+                    title="Degradar a Usuario Normal">
+                    ⬇️ User
+                  </button>
+
+                  <button (click)="changeRole(user.uid, 'programmer')"
+                    class="btn btn-xs join-item btn-secondary btn-outline"
+                    [disabled]="user.role === 'programmer' || user.uid === SUPER_ADMIN_UID"
+                    title="Ascender a Programador">
+                    💻 Dev
+                  </button>
+
+                  <button (click)="changeRole(user.uid, 'admin')" class="btn btn-xs join-item btn-primary btn-outline"
+                    [disabled]="user.role === 'admin' || user.uid === SUPER_ADMIN_UID" title="Hacer Administrador">
+                    ⚡ Admin
+                  </button>
+                </div>
+
+                @if (user.uid === SUPER_ADMIN_UID) {
+                <span class="ml-2 badge badge-ghost badge-xs">👑 Creador</span>
+                }
+              </td>
+
+              <th>
+                <button (click)="viewDetails(user)" class="btn btn-ghost btn-xs">
+                  Detalles
+                </button>
+              </th>
+            </tr>
             } @empty {
-              <tr>
-                <td colspan="4" class="text-center py-8 opacity-50">
-                  Cargando usuarios o no hay datos...
-                </td>
-              </tr>
+            <tr>
+              <td colspan="4" class="text-center py-8 opacity-50">
+                Cargando usuarios o no hay datos...
+              </td>
+            </tr>
             }
           </tbody>
 
@@ -94,3 +98,43 @@
 
   </div>
 </div>
+
+@if (selectedUser()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+  <div class="card w-full max-w-md bg-base-100 shadow-2xl relative">
+
+    <button (click)="closeModal()" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+
+    <div class="card-body items-center text-center">
+      <div class="avatar online mb-4">
+        <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+          <img [src]="selectedUser()?.photoURL || 'https://ui-avatars.com/api/?name=' + selectedUser()?.email"
+            referrerpolicy="no-referrer" />
+        </div>
+      </div>
+
+      <h2 class="card-title text-2xl">{{ selectedUser()?.displayName || 'Usuario Sin Nombre' }}</h2>
+      <p class="text-base-content/60">{{ selectedUser()?.email }}</p>
+
+      <div class="badge badge-lg mt-2" [ngClass]="{
+               'badge-primary': selectedUser()?.role === 'admin',
+               'badge-secondary': selectedUser()?.role === 'programmer',
+               'badge-ghost': selectedUser()?.role === 'user' || !selectedUser()?.role
+             }">
+        {{ selectedUser()?.role || 'USER' | uppercase }}
+      </div>
+
+      <div class="divider">Datos Técnicos</div>
+
+      <div class="w-full text-left bg-base-200 p-4 rounded-lg text-xs font-mono overflow-x-auto">
+        <p><span class="font-bold opacity-50">UID:</span> <br> {{ selectedUser()?.uid }}</p>
+        <p class="mt-2"><span class="font-bold opacity-50">PROVIDER:</span> Google</p>
+      </div>
+
+      <div class="card-actions justify-end mt-6 w-full">
+        <button class="btn btn-primary w-full" (click)="closeModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
