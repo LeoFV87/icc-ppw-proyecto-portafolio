@@ -14,10 +14,12 @@ import { AuthService } from '../../../../core/services/firebase/auth';
   imports: [CommonModule, RouterModule],
   templateUrl: './user-dashboard.html',
 })
+
 export class UserDashboard {
   private advisoryService = inject(AdvisoryService);
   private authService = inject(AuthService);
 
+  //obtiene la solicitud del usuario
   myAdvisories$ = toObservable(this.authService.currentUser).pipe(
     switchMap(user => {
       if (user) {

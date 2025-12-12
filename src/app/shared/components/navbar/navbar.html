@@ -24,6 +24,7 @@
 
     </label>
 
+    <!-- //redirige a la pagina login -->
     @if (!currentUser() && !router.url.includes('/auth/login')) {
       <a routerLink="/auth/login" class="btn btn-primary btn-sm">Iniciar Sesión</a>
     }

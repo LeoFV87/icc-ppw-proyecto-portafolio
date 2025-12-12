@@ -38,7 +38,7 @@ export class AdminDashboard implements OnInit {
       alert('⛔ ACCIÓN DENEGADA: No se puede modificar el rol del Creador.');
       return;
     }
-
+// conexion a firestore para actualizar el rol 
     try {
       const userDocRef = doc(this.firestore, `users/${uid}`);
       await updateDoc(userDocRef, { role: newRole });
