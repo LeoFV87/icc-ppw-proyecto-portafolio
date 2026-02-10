@@ -69,12 +69,13 @@
               <span class="label-text font-bold">Selecciona un Horario *</span>
             </label>
 
-            @let slots = selectedProgrammer()?.availability;
-
-            @if (slots && slots.length > 0) {
-              <select [(ngModel)]="selectedSlot" class="select select-bordered w-full">
-                <option disabled value="">-- Elige una opción --</option>
-                @for (slot of slots; track slot) {
+            @if (availableSlots().length > 0) {
+              <select
+                [ngModel]="selectedSlot()"
+                (ngModelChange)="selectedSlot.set($event)"
+                class="select select-bordered w-full">
+                <option value="" disabled>-- Elige una opción --</option>
+                @for (slot of availableSlots(); track slot) {
                   <option [value]="slot">{{ slot }}</option>
                 }
               </select>

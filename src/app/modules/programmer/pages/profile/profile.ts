@@ -24,6 +24,7 @@ export class Profile {
   specialty = signal('');
   linkedin = signal('');
   github = signal('');
+  availabilityInput = signal('');
   isSaving = signal(false);
 
   constructor() {
@@ -42,25 +43,28 @@ export class Profile {
 
   async saveProfile() {
     this.isSaving.set(true);
+
     const skillsArray = this.skillsInput().split(',').map(s => s.trim()).filter(s => s);
+    const availabilityArray = this.availabilityInput().split(',').map(a => a.trim()).filter(a => a);
 
     const profileData = {
       description: this.description(),
       skills: skillsArray,
+      availability: availabilityArray,
       photoURL: this.photoInput(),
       specialty: this.specialty(),
       linkedin: this.linkedin(),
       github: this.github()
     };
 
-    // Llamada a tu Backend de Spring Boot
     this.http.put('http://localhost:8080/api/users/profile', profileData).subscribe({
       next: () => {
-        alert('✅ Perfil guardado en PostgreSQL');
+        alert('✅ Perfil y Horarios guardados en PostgreSQL');
         this.isSaving.set(false);
       },
-      error: () => {
-        alert('❌ Error al guardar');
+      error: (err) => {
+        console.error('Error al guardar:', err);
+        alert('❌ Error al guardar perfil');
         this.isSaving.set(false);
       }
     });

@@ -1,35 +1,89 @@
 <div class="min-h-screen bg-base-100 p-8">
-  <h1 class="text-3xl font-bold mb-6">👋 Panel de Programador</h1>
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+    <h1 class="text-4xl font-black">👋 Panel de Programador</h1>
+    <button (click)="exportToExcel()" class="btn btn-info btn-outline gap-2 shadow-md">
+      <span>📥</span> Descargar Reporte Excel
+    </button>
+  </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-    <a routerLink="/programmer/proyectos" class="card bg-primary text-primary-content hover:scale-105 transition-transform cursor-pointer shadow-xl">
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+    <a routerLink="/programmer/proyectos" class="card bg-primary text-primary-content hover:scale-105 transition-all cursor-pointer shadow-xl">
       <div class="card-body">
-        <h2 class="card-title text-2xl">📂 Mis Proyectos</h2>
-        <p>Sube y gestiona tu portafolio.</p>
+        <h2 class="card-title text-2xl font-bold">📂 Proyectos</h2>
+        <p class="opacity-80">Gestiona tu portafolio público.</p>
       </div>
     </a>
 
-    <a routerLink="/programmer/asesorias" class="card bg-secondary text-secondary-content hover:scale-105 transition-transform cursor-pointer shadow-xl">
+    <a routerLink="/programmer/asesorias" class="card bg-secondary text-secondary-content hover:scale-105 transition-all cursor-pointer shadow-xl">
       <div class="card-body">
-        <h2 class="card-title text-2xl">📅 Asesorías</h2>
-        <p>Revisa tus solicitudes pendientes.</p>
+        <h2 class="card-title text-2xl font-bold">📅 Asesorías</h2>
+        <p class="opacity-80">Revisa solicitudes nuevas.</p>
       </div>
     </a>
 
-    <a routerLink="/programmer/perfil" class="card bg-accent text-accent-content hover:scale-105 transition-transform cursor-pointer shadow-xl">
+    <a routerLink="/programmer/perfil" class="card bg-accent text-accent-content hover:scale-105 transition-all cursor-pointer shadow-xl">
       <div class="card-body">
-        <h2 class="card-title text-2xl">👤 Mi Perfil</h2>
-        <p>Actualiza tus skills y foto.</p>
+        <h2 class="card-title text-2xl font-bold">👤 Mi Perfil</h2>
+        <p class="opacity-80">Actualiza tus habilidades.</p>
       </div>
     </a>
 
-    <a routerLink="/programmer/horarios" class="card bg-neutral text-neutral-content hover:scale-105 transition-transform cursor-pointer shadow-xl">
+    <a routerLink="/programmer/horarios" class="card bg-neutral text-neutral-content hover:scale-105 transition-all cursor-pointer shadow-xl">
       <div class="card-body">
-        <h2 class="card-title text-2xl">⏰ Mis Horarios</h2>
-        <p>Define cuándo estás disponible.</p>
+        <h2 class="card-title text-2xl font-bold">⏰ Horarios</h2>
+        <p class="opacity-80">Define tu disponibilidad.</p>
       </div>
     </a>
+  </div>
 
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <div class="card bg-base-100 shadow-xl border border-base-200 lg:col-span-1">
+      <div class="card-body items-center text-center">
+        <h2 class="card-title text-xl mb-6">📊 Estado de Asesorías</h2>
+        <div class="w-full h-72">
+          <canvas #statsChart></canvas>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-2">
+      <div class="bg-base-200 p-8 rounded-3xl shadow-inner h-full border border-base-300">
+        <h3 class="text-2xl font-bold mb-6 flex items-center gap-3">
+          <span class="p-2 bg-green-500 rounded-lg text-white">💬</span>
+          Acción Rápida: Contactar Cliente
+        </h3>
+
+        <div class="overflow-x-auto bg-base-100 rounded-2xl border border-base-300">
+          <table class="table w-full">
+            <thead class="bg-base-200">
+              <tr>
+                <th class="py-4">Cliente</th>
+                <th>Tema</th>
+                <th class="text-center">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="hover:bg-base-200/50 transition-colors">
+                <td>
+                  <div class="font-bold">Leo Fernando Vasconez</div>
+                  <div class="text-xs opacity-50 italic">leo.vasconez@example.com</div>
+                </td>
+                <td><span class="badge badge-ghost">Java Spring Boot</span></td>
+                <td class="text-center">
+                  <button
+                    (click)="contactWhatsApp({clientName: 'Leo', topic: 'Java Spring Boot', timeSlot: 'Lunes 10:00'})"
+                    class="btn btn-sm btn-success text-white rounded-full px-6 shadow-md">
+                    WhatsApp
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="mt-4 text-sm text-base-content/50 italic text-center">
+          * La integración de WhatsApp permite coordinar detalles rápidamente con los interesados.
+        </p>
+      </div>
+    </div>
   </div>
 </div>

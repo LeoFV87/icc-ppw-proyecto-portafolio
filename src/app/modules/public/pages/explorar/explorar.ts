@@ -37,28 +37,38 @@ export class Explorar implements OnInit {
   requestMessage = signal('');
   selectedSlot = signal('');
   isModalOpen = signal(false);
+  availableSlots = signal<string[]>([]);
 
   ngOnInit() {
     this.loadProgrammers();
   }
 
   loadProgrammers() {
-  this.http.get<Programmer[]>('http://localhost:8080/api/users').subscribe({
-    next: (data) => {
-      const onlyDevs = data.filter(u => u.role?.toLowerCase() === 'programmer');
-      this.programmers.set(onlyDevs);
-    },
-    error: (err) => console.error('Error al cargar talentos:', err)
-  });
-}
+    this.http.get<Programmer[]>('http://localhost:8080/api/users').subscribe({
+      next: (data) => {
+        const onlyDevs = data.filter(u => u.role?.toLowerCase() === 'programmer');
+        this.programmers.set(onlyDevs);
+      },
+      error: (err) => console.error('Error al cargar talentos:', err)
+    });
+  }
 
   openRequestModal(dev: Programmer) {
     if (!this.currentUser()) {
       alert('Debes iniciar sesión para solicitar una asesoría.');
       return;
     }
+
     this.selectedProgrammer.set(dev);
     this.selectedSlot.set('');
+    this.availableSlots.set([]);
+
+    // Cargamos horarios reales por ID para el combo
+    this.advisoryService.getAvailability(dev.id).subscribe({
+      next: (slots) => this.availableSlots.set(slots),
+      error: () => this.availableSlots.set([])
+    });
+
     this.isModalOpen.set(true);
   }
 
@@ -71,22 +81,34 @@ export class Explorar implements OnInit {
   }
 
   async sendRequest() {
-  const dev = this.selectedProgrammer();
-  if (dev && this.requestTopic() && this.selectedSlot()) {
-    try {
-      await this.advisoryService.requestAdvisory({
-        programmerId: dev.email,
-        programmerName: dev.displayName,
-        topic: this.requestTopic(),
-        message: this.requestMessage(),
-        timeSlot: this.selectedSlot(),
-        status: 'pending'
-      });
-      alert('✅ Solicitud enviada con éxito');
-      this.closeModal();
-     } catch (error) {
-      alert('Error al enviar la solicitud');
-       }
+    const dev = this.selectedProgrammer();
+    const user = this.currentUser();
+
+    if (dev && user && this.requestTopic() && this.selectedSlot()) {
+      try {
+        await this.advisoryService.requestAdvisory({
+          // CLIENTE: Datos del que solicita
+          clientId: user.uid || '1',
+          clientName: user.displayName || 'Usuario',
+          clientEmail: user.email || '',
+
+          // PROGRAMADOR: Usamos EMAIL como ID para que el backend lo encuentre
+          programmerId: dev.email,
+          programmerName: dev.displayName,
+
+          // ASESORÍA
+          topic: this.requestTopic(),
+          message: this.requestMessage(),
+          timeSlot: this.selectedSlot(),
+          status: 'pending'
+        });
+
+        alert('✅ Solicitud enviada con éxito');
+        this.closeModal();
+      } catch (error) {
+        console.error('Error al enviar:', error);
+        alert('Error al enviar la solicitud.');
+      }
     }
-   }
+  }
 }

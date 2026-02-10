@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom, Observable } from 'rxjs';
 
-// Actualizamos la interfaz para que coincida con tu modelo de Java/PostgreSQL
+// Interfaz para las peticiones de asesoría
 export interface AdvisoryRequest {
   id?: number;
   clientId?: string;
@@ -24,28 +24,50 @@ export interface AdvisoryRequest {
 export class AdvisoryService {
   private http = inject(HttpClient);
   private apiUrl = 'http://localhost:8080/api/advisories';
+  private usersUrl = 'http://localhost:8080/api/users';
 
-  // 1. Solicitar nueva asesoría (POST)
-  requestAdvisory(data: AdvisoryRequest) {
-  return firstValueFrom(
-    this.http.post('http://localhost:8080/api/advisories', data)
-    );
+  /** * 1. Disponibilidad: Obtener horarios reales del programador
+   */
+  getAvailability(id: number): Observable<string[]> {
+    return this.http.get<string[]>(`${this.usersUrl}/${id}/availability`);
   }
 
-  // 2. Obtener asesorías del Cliente (GET)
-  // Nota: El Backend ya filtra por el usuario del Token gracias al Ownership
+  /** * 2. Crear: El cliente solicita una nueva asesoría
+   */
+  requestAdvisory(data: AdvisoryRequest) {
+    return firstValueFrom(this.http.post(this.apiUrl, data));
+  }
+
+  /** * 3. Cliente: Ver mis solicitudes enviadas
+   */
   getClientAdvisories(): Observable<AdvisoryRequest[]> {
     return this.http.get<AdvisoryRequest[]>(`${this.apiUrl}/my-advisories`);
   }
 
-  // 3. Obtener asesorías para el Programador (GET)
+  /** * 4. Programador: Ver las asesorías que me han solicitado (EL QUE FALTABA)
+   */
   getProgrammerAdvisories(): Observable<AdvisoryRequest[]> {
     return this.http.get<AdvisoryRequest[]>(`${this.apiUrl}/assigned`);
   }
 
-  // 4. Responder/Actualizar estado de la asesoría (PUT/PATCH)
+  /** * 5. Respuesta: Aceptar o rechazar una asesoría (EL OTRO QUE FALTABA)
+   */
   async respondAdvisory(id: number, status: 'accepted' | 'rejected', replyMessage: string) {
     const url = `${this.apiUrl}/${id}/respond`;
-    return this.http.put(url, { status, replyMessage }).toPromise();
+    // Enviamos el estado y el mensaje al backend de Spring Boot
+    return firstValueFrom(this.http.put(url, { status, replyMessage }));
+  }
+
+  /** * 6. Utilidad: Listar todos los programadores para los combos
+   */
+  getAllProgrammers(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.usersUrl}/role/programmer`);
+  }
+
+  /** * 7. Estadísticas: Obtener totales para el gráfico del dashboard
+   */
+  getStats(): Observable<any> {
+    // URL configurada en Java para las estadísticas de asesorías
+    return this.http.get(`${this.usersUrl}/stats/advisories`);
   }
 }
