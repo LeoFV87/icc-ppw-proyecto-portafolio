@@ -1,5 +1,6 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners, provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient, withInterceptors } from '@angular/common/http'; // Importación necesaria
 import { routes } from './app.routes';
 
 // 1. Importaciones de Firebase
@@ -7,7 +8,9 @@ import { initializeApp, provideFirebaseApp } from '@angular/fire/app';
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 
-// 2. Tu configuración (la que copiaste)
+// 2. Importación de tu nuevo Interceptor
+import { authInterceptor } from './core/interceptors/auth.interceptor';
+
 const firebaseConfig = {
   apiKey: "AIzaSyCHnZwGdhsVFCK7LT9ncSRT1bLCvypP2b8",
   authDomain: "proyecto-integrador-ppw.firebaseapp.com",
@@ -19,12 +22,15 @@ const firebaseConfig = {
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    // Tus proveedores actuales
+
+    provideHttpClient(
+      withInterceptors([authInterceptor])
+    ),
+
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes),
 
-    // 3. Proveedores de Firebase agregados
     provideFirebaseApp(() => initializeApp(firebaseConfig)),
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore())

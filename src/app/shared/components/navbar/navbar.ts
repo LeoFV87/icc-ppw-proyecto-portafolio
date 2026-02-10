@@ -18,7 +18,7 @@ export class Navbar {
   currentUser = this.authService.currentUser;
   userProfile = this.authService.userProfile;
 
-  // Signal para el tema (inicia en light por defecto)
+  // Signal para el tema
   currentTheme = signal('light');
 
   constructor() {
@@ -27,25 +27,31 @@ export class Navbar {
     this.setTheme(savedTheme);
   }
 
+  /**
+   * Determina si el usuario se encuentra en la página de inicio.
+   * Se utiliza para deshabilitar el clic en el logo y ocultar el botón "Home".
+   */
+  isHomePage(): boolean {
+    return this.router.url === '/' || this.router.url === '/home';
+  }
+
   // Función para alternar entre Sol y Luna
   toggleTheme() {
     const newTheme = this.currentTheme() === 'light' ? 'dark' : 'light';
     this.setTheme(newTheme);
   }
 
-  // Lógica interna para aplicar el cambio
+  // Lógica interna para aplicar el cambio de tema (DaisyUI)
   private setTheme(theme: string) {
     this.currentTheme.set(theme);
-    // Cambia el atributo en el HTML globalmente (DaisyUI detecta esto)
     document.documentElement.setAttribute('data-theme', theme);
-    // Guarda en memoria del navegador
     localStorage.setItem('theme', theme);
   }
 
   logout() {
     this.authService.logout().subscribe({
       next: () => {
-        // FORZAMOS LA REDIRECCIÓN AQUÍ
+        // Redirección forzada al login tras cerrar sesión
         this.router.navigate(['/auth/login']);
       },
       error: (err) => console.error('Error al cerrar sesión:', err)

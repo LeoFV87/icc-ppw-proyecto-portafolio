@@ -1,10 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, addDoc, query, where, collectionData, deleteDoc, doc, updateDoc } from '@angular/fire/firestore'; // <--- Agregamos updateDoc
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Project {
-  id?: string;
-  programmerId: string;
+  id?: number;
   title: string;
   description: string;
   imageUrl: string;
@@ -19,30 +18,36 @@ export interface Project {
   providedIn: 'root'
 })
 export class ProjectService {
-  private firestore = inject(Firestore);
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:8080/api/projects'; // URL del backend
+
+
+  getMyProjects(): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.apiUrl}/my-projects`);
+  }
+
+  // Para el Dashboard del Programador (Usa el Token)
+  getProjectsByProgrammerId(id: number): Observable<Project[]> {
+  return this.http.get<Project[]>(`${this.apiUrl}/programmer/${id}`);
+  }
 
   // 1. Crear
-  async addProject(project: Project) {
-    const ref = collection(this.firestore, 'projects');
-    return addDoc(ref, project);
+  addProject(project: Project): Observable<Project> {
+    return this.http.post<Project>(this.apiUrl, project);
   }
 
-  // 2. Leer
-  getProjectsByProgrammer(uid: string): Observable<Project[]> {
-    const ref = collection(this.firestore, 'projects');
-    const q = query(ref, where('programmerId', '==', uid));
-    return collectionData(q, { idField: 'id' }) as Observable<Project[]>;
+  // 2. Leer proyectos del programador (El Backend filtra por el Token)
+  getProjectsByProgrammer(): Observable<Project[]> {
+    return this.http.get<Project[]>(`${this.apiUrl}/my-projects`);
   }
 
-  // 3. Editar (NUEVO)
-  async updateProject(id: string, project: Partial<Project>) {
-    const ref = doc(this.firestore, `projects/${id}`);
-    return updateDoc(ref, project);
+  // 3. Editar
+  updateProject(id: number, project: Partial<Project>): Observable<Project> {
+    return this.http.put<Project>(`${this.apiUrl}/${id}`, project);
   }
 
   // 4. Eliminar
-  async deleteProject(projectId: string) {
-    const ref = doc(this.firestore, `projects/${projectId}`);
-    return deleteDoc(ref);
+  deleteProject(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }

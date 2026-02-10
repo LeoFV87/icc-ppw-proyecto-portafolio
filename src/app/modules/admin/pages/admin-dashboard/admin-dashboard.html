@@ -1,12 +1,24 @@
 <div class="min-h-screen bg-base-200 p-4 md:p-8">
   <div class="max-w-7xl mx-auto">
 
-    <div class="flex justify-between items-center mb-8">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-6">
       <div>
         <h1 class="text-3xl font-bold">Panel de Administración</h1>
-        <p class="text-base-content/60">Gestiona usuarios y permisos del sistema.</p>
+        <p class="text-base-content/60">Gestión centralizada de usuarios y métricas del sistema.</p>
       </div>
-      <div class="badge badge-primary badge-lg">Modo Dios ⚡</div>
+
+      <div class="stats shadow bg-base-100" *ngIf="stats()">
+        <div class="stat">
+          <div class="stat-title">Total Asesorías</div>
+          <div class="stat-value text-primary text-2xl">{{stats().total}}</div>
+          <div class="stat-desc">Registradas en el sistema</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title text-warning">Pendientes</div>
+          <div class="stat-value text-warning text-2xl">{{stats().pending}}</div>
+          <div class="stat-desc">Esperando respuesta</div>
+        </div>
+      </div>
     </div>
 
     <div class="card bg-base-100 shadow-xl overflow-hidden">
@@ -20,17 +32,14 @@
               <th>Acciones</th>
             </tr>
           </thead>
-
           <tbody>
-            @for (user of users$ | async; track user.uid) {
+            @for (user of users(); track user.id) {
             <tr class="hover:bg-base-200/50 transition-colors">
-
               <td>
                 <div class="flex items-center gap-3">
                   <div class="avatar">
                     <div class="mask mask-squircle w-12 h-12 bg-base-300">
-                      <img [src]="user.photoURL || 'https://ui-avatars.com/api/?name=' + user.email" alt="Avatar"
-                        referrerpolicy="no-referrer" />
+                      <img [src]="user.photoURL || 'https://ui-avatars.com/api/?name=' + user.displayName" />
                     </div>
                   </div>
                   <div>
@@ -39,100 +48,70 @@
                   </div>
                 </div>
               </td>
-
               <td>
-                <div class="badge badge-lg gap-2" [ngClass]="{
-                         'badge-primary': user.role === 'admin',
-                         'badge-secondary': user.role === 'programmer',
-                         'badge-ghost': user.role === 'user' || !user.role
-                       }">
-                  {{ user.role || 'USER' | uppercase }}
-                </div>
+                <span class="badge badge-md" [ngClass]="{
+                  'badge-primary': user.role === 'admin',
+                  'badge-secondary': user.role === 'programmer',
+                  'badge-ghost': user.role === 'user'
+                }">
+                  {{ user.role | uppercase }}
+                </span>
               </td>
-
               <td>
                 <div class="join">
+                  <button (click)="changeRole(user.id, user.email, 'user')"
+                    class="btn btn-xs join-item"
+                    [disabled]="user.role === 'user' || user.email === MAIN_ADMIN_EMAIL">User</button>
 
-                  <button (click)="changeRole(user.uid, 'user')" class="btn btn-xs join-item btn-warning btn-outline"
-                    [disabled]="user.role === 'user' || !user.role || user.uid === SUPER_ADMIN_UID"
-                    title="Degradar a Usuario Normal">
-                    ⬇️ User
-                  </button>
+                  <button (click)="changeRole(user.id, user.email, 'programmer')"
+                    class="btn btn-xs join-item"
+                    [disabled]="user.role === 'programmer' || user.email === MAIN_ADMIN_EMAIL">Dev</button>
 
-                  <button (click)="changeRole(user.uid, 'programmer')"
-                    class="btn btn-xs join-item btn-secondary btn-outline"
-                    [disabled]="user.role === 'programmer' || user.uid === SUPER_ADMIN_UID"
-                    title="Ascender a Programador">
-                    💻 Dev
-                  </button>
-
-                  <button (click)="changeRole(user.uid, 'admin')" class="btn btn-xs join-item btn-primary btn-outline"
-                    [disabled]="user.role === 'admin' || user.uid === SUPER_ADMIN_UID" title="Hacer Administrador">
-                    ⚡ Admin
-                  </button>
+                  <button (click)="changeRole(user.id, user.email, 'admin')"
+                    class="btn btn-xs join-item"
+                    [disabled]="user.role === 'admin' || user.email === MAIN_ADMIN_EMAIL">Admin</button>
                 </div>
-
-                @if (user.uid === SUPER_ADMIN_UID) {
-                <span class="ml-2 badge badge-ghost badge-xs">👑 Creador</span>
-                }
               </td>
-
               <th>
-                <button (click)="viewDetails(user)" class="btn btn-ghost btn-xs">
-                  Detalles
-                </button>
+                <button (click)="viewDetails(user)" class="btn btn-ghost btn-xs">Detalles</button>
               </th>
-            </tr>
-            } @empty {
-            <tr>
-              <td colspan="4" class="text-center py-8 opacity-50">
-                Cargando usuarios o no hay datos...
-              </td>
             </tr>
             }
           </tbody>
-
         </table>
       </div>
     </div>
-
   </div>
 </div>
 
 @if (selectedUser()) {
-<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
-  <div class="card w-full max-w-md bg-base-100 shadow-2xl relative">
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+  <div class="card w-full max-w-md bg-base-100 shadow-2xl relative border border-base-300">
 
     <button (click)="closeModal()" class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
 
     <div class="card-body items-center text-center">
-      <div class="avatar online mb-4">
+      <div class="avatar mb-4">
         <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-          <img [src]="selectedUser()?.photoURL || 'https://ui-avatars.com/api/?name=' + selectedUser()?.email"
-            referrerpolicy="no-referrer" />
+          <img [src]="selectedUser()?.photoURL || 'https://ui-avatars.com/api/?name=' + selectedUser()?.displayName" />
         </div>
       </div>
 
-      <h2 class="card-title text-2xl">{{ selectedUser()?.displayName || 'Usuario Sin Nombre' }}</h2>
+      <h2 class="card-title text-2xl font-bold">{{ selectedUser()?.displayName }}</h2>
       <p class="text-base-content/60">{{ selectedUser()?.email }}</p>
 
-      <div class="badge badge-lg mt-2" [ngClass]="{
-               'badge-primary': selectedUser()?.role === 'admin',
-               'badge-secondary': selectedUser()?.role === 'programmer',
-               'badge-ghost': selectedUser()?.role === 'user' || !selectedUser()?.role
-             }">
-        {{ selectedUser()?.role || 'USER' | uppercase }}
+      <div class="badge badge-primary badge-outline badge-lg mt-2">{{ selectedUser()?.role | uppercase }}</div>
+
+      <div class="divider">Datos del Sistema (PostgreSQL)</div>
+
+      <div class="w-full text-left bg-base-200 p-4 rounded-lg text-xs font-mono space-y-2">
+        <p><span class="font-bold text-primary">ID_DB:</span> {{ selectedUser()?.id }}</p>
+        <p><span class="font-bold text-primary">ESPECIALIDAD:</span> {{ selectedUser()?.specialty || 'No asignada' }}</p>
+        <p><span class="font-bold text-primary">ESTADO:</span> Activo</p>
       </div>
 
-      <div class="divider">Datos Técnicos</div>
-
-      <div class="w-full text-left bg-base-200 p-4 rounded-lg text-xs font-mono overflow-x-auto">
-        <p><span class="font-bold opacity-50">UID:</span> <br> {{ selectedUser()?.uid }}</p>
-        <p class="mt-2"><span class="font-bold opacity-50">PROVIDER:</span> Google</p>
-      </div>
-
-      <div class="card-actions justify-end mt-6 w-full">
-        <button class="btn btn-primary w-full" (click)="closeModal()">Cerrar</button>
+      <div class="card-actions mt-6 w-full">
+        <button class="btn btn-primary w-full" (click)="closeModal()">Entendido</button>
       </div>
     </div>
   </div>

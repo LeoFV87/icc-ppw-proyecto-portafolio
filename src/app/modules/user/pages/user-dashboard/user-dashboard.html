@@ -15,7 +15,7 @@
             <div>
               <h2 class="font-bold text-lg">{{ req.topic }}</h2>
               <p class="text-sm opacity-70">Programador: <span class="font-semibold">{{ req.programmerName }}</span></p>
-              <p class="text-xs mt-1">{{ req.createdAt.seconds * 1000 | date:'medium' }}</p>
+              <p class="text-xs mt-1">{{ req.createdAt | date:'medium' }}</p>
             </div>
 
             <div class="badge badge-lg"

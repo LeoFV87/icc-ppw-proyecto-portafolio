@@ -1,14 +1,15 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Firestore, collection, collectionData, doc, updateDoc } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 interface UserData {
-  uid: string;
+  id: number;
   displayName: string;
   email: string;
   photoURL?: string;
   role: 'admin' | 'programmer' | 'user';
+  specialty?: string;
 }
 
 @Component({
@@ -18,37 +19,54 @@ interface UserData {
   templateUrl: './admin-dashboard.html'
 })
 export class AdminDashboard implements OnInit {
-  private firestore = inject(Firestore);
-  users$!: Observable<UserData[]>;
+  private http = inject(HttpClient);
 
-
+  // Señales reactivas
+  users = signal<UserData[]>([]);
+  stats = signal<any>(null);
   selectedUser = signal<UserData | null>(null);
 
-  readonly SUPER_ADMIN_UID = 'hIXAtewNzaS6fgy3aFIo0DZlwad2';
+  // Seguridad: Email del administrador principal que no se puede degradar
+  readonly MAIN_ADMIN_EMAIL = 'admin@ups.edu.ec';
 
   ngOnInit() {
-    const usersCollection = collection(this.firestore, 'users');
-    this.users$ = collectionData(usersCollection, { idField: 'uid' }) as Observable<UserData[]>;
+    this.loadUsers();
+    this.loadStats();
   }
 
-  async changeRole(uid: string, newRole: 'admin' | 'programmer' | 'user') {
+  loadUsers() {
+    this.http.get<UserData[]>('http://localhost:8080/api/users').subscribe({
+      next: (data) => this.users.set(data),
+      error: (err) => console.error('Error al cargar usuarios:', err)
+    });
+  }
 
-    //PROTECCION AL CREADOR
-    if (uid === this.SUPER_ADMIN_UID) {
-      alert('⛔ ACCIÓN DENEGADA: No se puede modificar el rol del Creador.');
+  loadStats() {
+    this.http.get('http://localhost:8080/api/advisories/stats').subscribe({
+      next: (data) => this.stats.set(data),
+      error: (err) => console.error('Error al cargar estadísticas:', err)
+    });
+  }
+
+  async changeRole(id: number, email: string, newRole: string) {
+    // Bloqueo de seguridad para el admin principal
+    if (email === this.MAIN_ADMIN_EMAIL) {
+      alert('⛔ ACCIÓN DENEGADA: El Administrador Principal no puede cambiar su propio rol.');
       return;
     }
 
     try {
-      const userDocRef = doc(this.firestore, `users/${uid}`);
-      await updateDoc(userDocRef, { role: newRole });
-      console.log(`Rol actualizado a ${newRole} para el usuario ${uid}`);
+      // PatchMapping en Java: /api/users/{id}/role?role=newRole
+      await firstValueFrom(
+        this.http.patch(`http://localhost:8080/api/users/${id}/role?role=${newRole}`, {})
+      );
+      alert('✅ Rol actualizado correctamente');
+      this.loadUsers(); // Refrescar la tabla
     } catch (error) {
-      console.error('Error al cambiar rol:', error);
-      alert('Error al actualizar el rol.');
+      console.error(error);
+      alert('Error al actualizar el rol en el servidor.');
     }
   }
-
 
   viewDetails(user: UserData) {
     this.selectedUser.set(user);
@@ -57,8 +75,4 @@ export class AdminDashboard implements OnInit {
   closeModal() {
     this.selectedUser.set(null);
   }
-
-
-
-
 }

@@ -1,20 +1,20 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, addDoc, query, where, collectionData, Timestamp, updateDoc, doc } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom, Observable } from 'rxjs';
 
-
+// Actualizamos la interfaz para que coincida con tu modelo de Java/PostgreSQL
 export interface AdvisoryRequest {
-  id?: string;
-  clientId: string;
-  clientName: string;
-  clientEmail: string;
+  id?: number;
+  clientId?: string;
+  clientName?: string;
+  clientEmail?: string;
   programmerId: string;
   programmerName: string;
   topic: string;
   message: string;
   timeSlot: string;
-  status: 'pending' | 'accepted' | 'rejected';
-  createdAt: Timestamp;
+  status?: 'pending' | 'accepted' | 'rejected';
+  createdAt?: string;
   replyMessage?: string;
 }
 
@@ -22,41 +22,30 @@ export interface AdvisoryRequest {
   providedIn: 'root'
 })
 export class AdvisoryService {
-  private firestore = inject(Firestore);
+  private http = inject(HttpClient);
+  private apiUrl = 'http://localhost:8080/api/advisories';
 
-  async requestAdvisory(data: Omit<AdvisoryRequest, 'id' | 'createdAt' | 'status'>) {
-    const advisoriesRef = collection(this.firestore, 'advisories');
-    await addDoc(advisoriesRef, {
-      ...data,
-      status: 'pending',
-      createdAt: Timestamp.now()
-    });
+  // 1. Solicitar nueva asesoría (POST)
+  requestAdvisory(data: AdvisoryRequest) {
+  return firstValueFrom(
+    this.http.post('http://localhost:8080/api/advisories', data)
+    );
   }
 
-  getClientAdvisories(clientId: string): Observable<AdvisoryRequest[]> {
-    const advisoriesRef = collection(this.firestore, 'advisories');
-    const q = query(advisoriesRef, where('clientId', '==', clientId));
-    return collectionData(q, { idField: 'id' }) as Observable<AdvisoryRequest[]>;
+  // 2. Obtener asesorías del Cliente (GET)
+  // Nota: El Backend ya filtra por el usuario del Token gracias al Ownership
+  getClientAdvisories(): Observable<AdvisoryRequest[]> {
+    return this.http.get<AdvisoryRequest[]>(`${this.apiUrl}/my-advisories`);
   }
 
-  getProgrammerAdvisories(programmerId: string): Observable<AdvisoryRequest[]> {
-    const advisoriesRef = collection(this.firestore, 'advisories');
-    const q = query(advisoriesRef, where('programmerId', '==', programmerId));
-    return collectionData(q, { idField: 'id' }) as Observable<AdvisoryRequest[]>;
+  // 3. Obtener asesorías para el Programador (GET)
+  getProgrammerAdvisories(): Observable<AdvisoryRequest[]> {
+    return this.http.get<AdvisoryRequest[]>(`${this.apiUrl}/assigned`);
   }
 
-  async updateAdvisoryStatus(advisoryId: string, newStatus: 'accepted' | 'rejected') {
-    const advisoryRef = doc(this.firestore, `advisories/${advisoryId}`);
-    await updateDoc(advisoryRef, { status: newStatus });
+  // 4. Responder/Actualizar estado de la asesoría (PUT/PATCH)
+  async respondAdvisory(id: number, status: 'accepted' | 'rejected', replyMessage: string) {
+    const url = `${this.apiUrl}/${id}/respond`;
+    return this.http.put(url, { status, replyMessage }).toPromise();
   }
-
-
-  async respondAdvisory(id: string, status: 'accepted' | 'rejected', replyMessage: string) {
-    const ref = doc(this.firestore, `advisories/${id}`);
-    return updateDoc(ref, {
-      status,
-      replyMessage
-    });
-  }
-
 }

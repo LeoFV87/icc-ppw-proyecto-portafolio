@@ -21,7 +21,7 @@ export class UserDashboard {
   myAdvisories$ = toObservable(this.authService.currentUser).pipe(
     switchMap(user => {
       if (user) {
-        return this.advisoryService.getClientAdvisories(user.uid);
+        return this.advisoryService.getClientAdvisories();
       }
       return of([]);
     })

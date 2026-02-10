@@ -1,12 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Auth, user, signInWithPopup, GoogleAuthProvider, signOut, User } from '@angular/fire/auth';
-import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore';
+import { Auth, signOut } from '@angular/fire/auth';
 import { Router } from '@angular/router';
-import { Observable, from, of } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from '@angular/fire/auth';
+import { HttpClient } from '@angular/common/http';
+import { tap, from, of } from 'rxjs';
 
-// Definimos la interfaz
 export type Role = 'admin' | 'programmer' | 'user';
 
 export interface UserProfile {
@@ -14,106 +11,130 @@ export interface UserProfile {
   email: string;
   role: Role;
   displayName?: string;
+  description?: string;
+  specialty?: string;
   photoURL?: string;
+  skills?: string[];
+  linkedin?: string;
+  github?: string;
+  availability?: string[];
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-
-  private auth = inject(Auth);
-  private firestore = inject(Firestore);
+  private http = inject(HttpClient);
   private router = inject(Router);
+  private auth = inject(Auth);
 
-  // Signals para manejar el estado
-  currentUser = signal<User | null>(null);
+  currentUser = signal<any | null>(null);
   userProfile = signal<UserProfile | null>(null);
+  loading = signal<boolean>(false);
 
-  loading = signal<boolean>(true);
-
-  user$ = user(this.auth).pipe(
-    tap((user) => {
-      this.loading.set(true);
-      this.currentUser.set(user);
-      if (user) {
-        // Si hay usuario, buscamos su perfil y luego apagamos loading
-        this.fetchUserProfile(user).then(() => this.loading.set(false));
-      } else {
-        // Si no hay usuario, limpiamos y apagamos loading
-        this.userProfile.set(null);
-        this.loading.set(false);
-      }
-    })
-  );
+  private apiUrl = 'http://localhost:8080/api'; // Url del backend de Spring
 
   constructor() {
-    // Suscribirse para que arranque el monitoreo
-    this.user$.subscribe();
+    // Al instanciar el servicio (cuando abres la app o recargas),
+    // intentamos recuperar la sesión del localStorage.
+    this.restoreSession();
   }
 
-  // Inicia sesión con credenciales de correo y contraseña existentes
-  loginWithEmail(email: string, pass: string) {
-    return from(signInWithEmailAndPassword(this.auth, email, pass));
-  }
+  //LÓGICA DE PERSISTENCIA
+  private restoreSession() {
+    const token = localStorage.getItem('jwt_token');
+    const savedProfile = localStorage.getItem('user_profile');
 
-  // Crea una cuenta nueva en Firebase Auth y genera automáticamente el perfil en Firestore
-  registerWithEmail(email: string, pass: string) {
-    return from(createUserWithEmailAndPassword(this.auth, email, pass)).pipe(
-      switchMap((userCredential) => {
-        // Establecemos el usuario actual en el estado
-        this.currentUser.set(userCredential.user);
-        // Llamamos a la función que crea el documento en la base de datos
-        return this.createUserProfile(userCredential.user);
-      })
-    );
-  }
-
-  // Inicia sesión abriendo una ventana emergente de Google
-  loginWithGoogle() {
-    return from(signInWithPopup(this.auth, new GoogleAuthProvider()));
-  }
-
-  // Cierra la sesión, limpia los estados y redirige al login
-  logout() {
-    return from(signOut(this.auth)).pipe(
-      tap(() => {
-        this.currentUser.set(null);
-        this.userProfile.set(null);
-      })
-    );
-  }
-
-  // --- Métodos Privados y de Base de Datos ---
-
-  private async fetchUserProfile(user: User) {
-    const userDocRef = doc(this.firestore, 'users', user.uid);
-    const snapshot = await getDoc(userDocRef);
-
-    if (snapshot.exists()) {
-      // Si existe el documento, actualizamos la signal del perfil
-      this.userProfile.set(snapshot.data() as UserProfile);
-    } else {
-      // Si no existe, creamos uno nuevo por defecto
-      await this.createUserProfile(user);
+    if (token && savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile);
+        this.userProfile.set(profile);
+        this.currentUser.set({ email: profile.email });
+        console.log('✅ Sesión restaurada desde localStorage');
+      } catch (e) {
+        console.error('❌ Error al parsear el perfil guardado', e);
+        this.logout();
+      }
     }
   }
 
-  // Crea el documento del usuario en Firestore con rol 'user' por defecto
-  // (Nota: Se hizo público o accesible internamente para usarse en el registro)
-  async createUserProfile(user: User) {
-    const newProfile: UserProfile = {
-      uid: user.uid,
-      email: user.email!,
-      displayName: user.displayName || '', // En registro por correo esto puede estar vacío inicialmente
-      photoURL: user.photoURL || '',
-      role: 'user'
-    };
-    await setDoc(doc(this.firestore, 'users', user.uid), newProfile);
-    this.userProfile.set(newProfile);
+  // 1. LOGIN (Hacia Spring Boot)
+  loginWithEmail(email: string, pass: string) {
+    this.loading.set(true);
+    return this.http.post<any>(`${this.apiUrl}/auth/login`, { email, password: pass }).pipe(
+      tap({
+        next: (res) => {
+          // Guardamos el token
+          localStorage.setItem('jwt_token', res.token);
+
+          const profile: UserProfile = {
+            uid: res.email,
+            email: res.email,
+            role: res.role as Role,
+            displayName: res.email.split('@')[0]
+          };
+
+          // Guardamos el perfil completo como string para recuperarlo tras el F5
+          localStorage.setItem('user_profile', JSON.stringify(profile));
+
+          this.userProfile.set(profile);
+          this.currentUser.set({ email: res.email });
+          this.loading.set(false);
+          console.log('🔑 Login exitoso: Token y Perfil persistidos.');
+        },
+        error: (err) => {
+          this.loading.set(false);
+          console.error('❌ Error en login:', err);
+        }
+      })
+    );
   }
 
-  // --- Utilidades ---
+  // 2. REGISTRO (Hacia Spring Boot)
+  registerWithEmail(email: string, pass: string) {
+    this.loading.set(true);
+    const newUser = {
+      name: email.split('@')[0],
+      email: email,
+      password: pass,
+      role: 'user',
+      displayName: email.split('@')[0]
+    };
+
+    return this.http.post<any>(`${this.apiUrl}/users`, newUser).pipe(
+      tap({
+        next: () => {
+          this.loading.set(false);
+          console.log('👤 Usuario registrado exitosamente');
+        },
+        error: () => this.loading.set(false)
+      })
+    );
+  }
+
+  // 3. GOOGLE (Placeholder)
+  loginWithGoogle() {
+    console.warn('Google login temporalmente deshabilitado');
+    return of(null);
+  }
+
+  // 4. LOGOUT
+  logout() {
+    // Limpiamos todo el rastro en el navegador
+    localStorage.removeItem('jwt_token');
+    localStorage.removeItem('user_profile');
+
+    this.userProfile.set(null);
+    this.currentUser.set(null);
+
+    // Cerramos sesión también en Firebase por si acaso y navegamos al login
+    return from(signOut(this.auth)).pipe(
+      tap(() => {
+        console.log('🚪 Sesión cerrada y localStorage limpio.');
+        this.router.navigate(['/auth/login']);
+      })
+    );
+  }
 
   hasRole(role: Role): boolean {
     return this.userProfile()?.role === role;

@@ -1,55 +1,56 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Firestore, collection, query, where, collectionData } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../../../core/services/firebase/auth';
 import { AdvisoryService } from '../../../../core/services/advisory/advisory';
 
-
 interface Programmer {
-  uid: string;
+  id: number;
   displayName: string;
+  email: string;
   role: string;
   photoURL: string;
   description?: string;
   skills?: string[];
-  // IMPORTANTE: Agregamos esto para que TypeScript sepa que el programador tiene horarios
   availability?: string[];
+  specialty?: string;
 }
 
 @Component({
   selector: 'explorar',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
-  templateUrl: './explorar.html' // Asegúrate que tu archivo se llame así
+  templateUrl: './explorar.html'
 })
-export class Explorar {
-  private firestore = inject(Firestore);
+export class Explorar implements OnInit {
+  private http = inject(HttpClient);
   private authService = inject(AuthService);
   private advisoryService = inject(AdvisoryService);
 
   currentUser = this.authService.currentUser;
-  userProfile = this.authService.userProfile;
+  programmers = signal<Programmer[]>([]);
 
-  programmers$: Observable<Programmer[]>;
-
-  // Estado para el Modal
   selectedProgrammer = signal<Programmer | null>(null);
   requestTopic = signal('');
   requestMessage = signal('');
-
-  //Señal del horario
   selectedSlot = signal('');
-
   isModalOpen = signal(false);
 
-  constructor() {
-    const usersRef = collection(this.firestore, 'users');
-    const q = query(usersRef, where('role', '==', 'programmer'));
-    this.programmers$ = collectionData(q, { idField: 'uid' }) as Observable<Programmer[]>;
+  ngOnInit() {
+    this.loadProgrammers();
   }
+
+  loadProgrammers() {
+  this.http.get<Programmer[]>('http://localhost:8080/api/users').subscribe({
+    next: (data) => {
+      const onlyDevs = data.filter(u => u.role?.toLowerCase() === 'programmer');
+      this.programmers.set(onlyDevs);
+    },
+    error: (err) => console.error('Error al cargar talentos:', err)
+  });
+}
 
   openRequestModal(dev: Programmer) {
     if (!this.currentUser()) {
@@ -57,10 +58,7 @@ export class Explorar {
       return;
     }
     this.selectedProgrammer.set(dev);
-
-
     this.selectedSlot.set('');
-
     this.isModalOpen.set(true);
   }
 
@@ -73,33 +71,22 @@ export class Explorar {
   }
 
   async sendRequest() {
-    const user = this.currentUser();
-    const dev = this.selectedProgrammer();
-
-
-    if (user && dev && this.requestTopic() && this.selectedSlot()) {
-      try {
-        await this.advisoryService.requestAdvisory({
-          clientId: user.uid,
-          clientName: user.displayName || 'Usuario',
-          clientEmail: user.email || '',
-          programmerId: dev.uid,
-          programmerName: dev.displayName,
-          topic: this.requestTopic(),
-          message: this.requestMessage(),
-
-
-          timeSlot: this.selectedSlot()
-        });
-
-        alert('✅ Solicitud enviada con éxito');
-        this.closeModal();
-      } catch (error) {
-        console.error(error);
-        alert('Error al enviar solicitud');
-      }
-    } else {
-        alert('Por favor completa todos los campos obligatorios (Tema y Horario)');
+  const dev = this.selectedProgrammer();
+  if (dev && this.requestTopic() && this.selectedSlot()) {
+    try {
+      await this.advisoryService.requestAdvisory({
+        programmerId: dev.email,
+        programmerName: dev.displayName,
+        topic: this.requestTopic(),
+        message: this.requestMessage(),
+        timeSlot: this.selectedSlot(),
+        status: 'pending'
+      });
+      alert('✅ Solicitud enviada con éxito');
+      this.closeModal();
+     } catch (error) {
+      alert('Error al enviar la solicitud');
+       }
     }
-  }
+   }
 }

@@ -7,7 +7,7 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      @for (dev of programmers$ | async; track dev.uid) {
+      @for (dev of programmers(); track dev.id) {
         <div class="card bg-base-100 shadow-xl border border-base-200 hover:-translate-y-1 transition-all duration-300 overflow-visible">
 
           <div class="h-32 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-t-2xl relative">
@@ -15,7 +15,8 @@
           </div>
 
           <div class="flex justify-center -mt-12 px-4">
-            <div class="avatar online"> <div class="w-24 h-24 rounded-full ring ring-base-100 ring-offset-base-100 ring-offset-2 shadow-lg bg-base-100">
+            <div class="avatar online">
+              <div class="w-24 h-24 rounded-full ring ring-base-100 ring-offset-base-100 ring-offset-2 shadow-lg bg-base-100">
                 <img [src]="dev.photoURL || 'https://ui-avatars.com/api/?name=' + dev.displayName"
                      referrerpolicy="no-referrer"
                      class="object-cover" />
@@ -33,22 +34,20 @@
             </p>
 
             <div class="card-actions justify-center mt-6 gap-2 w-full">
-
-              <a [routerLink]="['/portfolio', dev.uid]" class="btn btn-outline btn-sm rounded-full">
+              <a [routerLink]="['/portfolio', dev.id]" class="btn btn-outline btn-sm rounded-full">
                 📂 Ver Portafolio
               </a>
 
-              @if (userProfile()?.role !== 'programmer') {
+              @if (currentUser()?.email !== dev.email) {
                 <button (click)="openRequestModal(dev)" class="btn btn-primary btn-sm rounded-full px-6">
                   📅 Solicitar
                 </button>
               } @else {
                 <div class="badge badge-ghost opacity-50 cursor-not-allowed p-3">
-                  Colega 👨‍💻
+                  Mi Perfil 👨‍💻
                 </div>
               }
             </div>
-
           </div>
         </div>
       } @empty {
@@ -63,44 +62,50 @@
     <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
       <div class="card w-full max-w-lg bg-base-100 shadow-2xl">
         <div class="card-body">
-          <h3 class="font-bold text-lg">Solicitar Asesoría a {{ selectedProgrammer()?.displayName }}</h3>
+          <h3 class="font-bold text-lg text-primary">Solicitar Asesoría a {{ selectedProgrammer()?.displayName }}</h3>
 
           <div class="form-control w-full mt-4">
             <label class="label">
-              <span class="label-text font-bold text-primary">Selecciona un Horario *</span>
+              <span class="label-text font-bold">Selecciona un Horario *</span>
             </label>
 
-            @let slots = $any(selectedProgrammer())?.availability;
+            @let slots = selectedProgrammer()?.availability;
 
             @if (slots && slots.length > 0) {
               <select [(ngModel)]="selectedSlot" class="select select-bordered w-full">
-                <option disabled selected value="">-- Elige una opción --</option>
+                <option disabled value="">-- Elige una opción --</option>
                 @for (slot of slots; track slot) {
                   <option [value]="slot">{{ slot }}</option>
                 }
               </select>
             } @else {
-              <div class="alert alert-warning text-sm flex gap-2">
-                <span>⚠️</span>
-                <span>Este programador aún no ha configurado sus horarios disponibles.</span>
+              <div class="alert alert-warning text-sm py-2">
+                <span>⚠️ Este programador no tiene horarios configurados.</span>
               </div>
             }
           </div>
 
           <div class="form-control w-full mt-4">
-            <label class="label"><span class="label-text">Tema de la Asesoría *</span></label>
-            <input type="text" [(ngModel)]="requestTopic" placeholder="Ej: Revisión de código Angular..." class="input input-bordered w-full" />
+            <label class="label"><span class="label-text font-bold">Tema de la Asesoría *</span></label>
+            <input type="text"
+                   [ngModel]="requestTopic()"
+                   (ngModelChange)="requestTopic.set($event)"
+                   placeholder="Ej: Revisión de código..."
+                   class="input input-bordered w-full" />
           </div>
 
           <div class="form-control w-full mt-4">
             <label class="label"><span class="label-text">Mensaje (Opcional)</span></label>
-            <textarea [(ngModel)]="requestMessage" class="textarea textarea-bordered h-24" placeholder="Detalles adicionales..."></textarea>
+            <textarea [ngModel]="requestMessage()"
+                      (ngModelChange)="requestMessage.set($event)"
+                      class="textarea textarea-bordered h-24"
+                      placeholder="Detalles adicionales..."></textarea>
           </div>
 
           <div class="card-actions justify-end mt-6">
             <button class="btn btn-ghost" (click)="closeModal()">Cancelar</button>
 
-            <button class="btn btn-primary"
+            <button class="btn btn-primary px-8"
                     (click)="sendRequest()"
                     [disabled]="!requestTopic() || !selectedSlot()">
               Enviar Solicitud

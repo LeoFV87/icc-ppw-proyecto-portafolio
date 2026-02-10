@@ -1,54 +1,54 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Firestore, doc, getDoc } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators'; // <--- IMPORTANTE: Necesario para el filtro
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Project, ProjectService } from '../../../../core/services/projects/project';
 
 @Component({
   selector: 'app-portfolio-detail',
   standalone: true,
   imports: [CommonModule, RouterModule],
-  templateUrl: './portfolio-detail.html' // Asegúrate de que coincida con tu nombre de archivo
+  templateUrl: './portfolio-detail.html'
 })
-export class PortfolioDetail implements OnInit { // El error decía que tu clase se llama PortfolioDetail
+export class PortfolioDetail implements OnInit {
   private route = inject(ActivatedRoute);
-  private firestore = inject(Firestore);
+  private http = inject(HttpClient);
   private projectService = inject(ProjectService);
 
-  programmerId = signal('');
+  programmerId = signal<number | null>(null);
   programmerData = signal<any>(null);
 
-  // === ESTAS SON LAS VARIABLES QUE FALTABAN ===
   academicProjects$!: Observable<Project[]>;
   laboralProjects$!: Observable<Project[]>;
 
-  async ngOnInit() {
-    // 1. Obtener ID de la URL
-    const id = this.route.snapshot.paramMap.get('id');
+  ngOnInit() {
+    const idParam = this.route.snapshot.paramMap.get('id');
 
-    if (id) {
+    // Verificamos que el ID exista y sea numérico
+    if (idParam && !isNaN(Number(idParam))) {
+      const id = Number(idParam);
       this.programmerId.set(id);
 
-      // 2. Cargar datos del usuario (Nombre, Foto, Bio, Redes)
-      const userDoc = await getDoc(doc(this.firestore, `users/${id}`));
-      if (userDoc.exists()) {
-        this.programmerData.set(userDoc.data());
-      }
+      // Cargar datos personales del programador
+      this.http.get(`http://localhost:8080/api/users/${id}`).subscribe({
+        next: (data) => this.programmerData.set(data),
+        error: (err) => console.error('Error al cargar datos del programador', err)
+      });
 
-      // 3. Cargar proyectos y separarlos por tipo
-      const allProjects$ = this.projectService.getProjectsByProgrammer(id);
+      // Cargar y filtrar proyectos
+      const allProjects$ = this.projectService.getProjectsByProgrammerId(id);
 
-      // Filtramos los académicos
       this.academicProjects$ = allProjects$.pipe(
-        map(projects => projects.filter(p => p.type === 'academico'))
+        map((projects: Project[]) => projects.filter(p => p.type === 'academico'))
       );
 
-      // Filtramos los laborales
       this.laboralProjects$ = allProjects$.pipe(
-        map(projects => projects.filter(p => p.type === 'laboral'))
+        map((projects: Project[]) => projects.filter(p => p.type === 'laboral'))
       );
+    } else {
+      console.warn('ID de programador no válido en la URL');
     }
   }
 }
