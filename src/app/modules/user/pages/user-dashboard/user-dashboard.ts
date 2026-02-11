@@ -6,7 +6,7 @@ import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { RouterModule } from '@angular/router';
 import { AdvisoryService, AdvisoryRequest } from '../../../../core/services/advisory/advisory';
-import { AuthService } from '../../../../core/services/firebase/auth';
+import { AuthService } from '../../../../core/services/auth/auth';
 
 @Component({
   selector: 'app-user-dashboard',

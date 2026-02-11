@@ -1,7 +1,7 @@
 import { Component, inject, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../../core/services/firebase/auth';
+import { AuthService } from '../../../../core/services/auth/auth';
 
 @Component({
   selector: 'app-profile-settings',

@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { filter, map, take } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { AuthService } from '../services/firebase/auth';
+import { AuthService } from '../services/auth/auth';
 
 export const userGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);

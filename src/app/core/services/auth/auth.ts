@@ -1,8 +1,8 @@
 import { Injectable, inject, signal } from '@angular/core';
-import { Auth, signOut } from '@angular/fire/auth';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { tap, from, Observable } from 'rxjs';
+import { tap, Observable, of } from 'rxjs';
+import { environment } from '../../../../environments/environment';
 
 export type Role = 'admin' | 'programmer' | 'user';
 
@@ -27,13 +27,14 @@ export interface UserProfile {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private auth = inject(Auth);
 
+  // Signals para el estado global
   currentUser = signal<any | null>(null);
   userProfile = signal<UserProfile | null>(null);
   loading = signal<boolean>(false);
 
-  private apiUrl = 'http://localhost:8080/api';
+  // Se asigna la URL desde el archivo de entorno
+  private apiUrl = environment.apiUrl;
 
   constructor() {
     this.restoreSession();
@@ -92,18 +93,18 @@ export class AuthService {
     });
   }
 
+  /**
+   * Limpia la sesión localmente eliminando el JWT.
+   */
   logout(): Observable<void> {
     localStorage.removeItem('jwt_token');
     localStorage.removeItem('user_profile');
     this.userProfile.set(null);
     this.currentUser.set(null);
-    return from(signOut(this.auth));
+
+    return of(undefined);
   }
 
-  /**
-   * Método que faltaba: Verifica si el usuario tiene un rol específico.
-   * Compara en minúsculas para evitar errores de consistencia.
-   */
   hasRole(role: string): boolean {
     const currentRole = this.userProfile()?.role;
     return currentRole?.toLowerCase() === role.toLowerCase();

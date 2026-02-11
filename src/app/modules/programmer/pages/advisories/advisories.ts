@@ -5,7 +5,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { AdvisoryRequest, AdvisoryService } from '../../../../core/services/advisory/advisory';
-import { AuthService } from '../../../../core/services/firebase/auth';
+import { AuthService } from '../../../../core/services/auth/auth';
 import emailjs from '@emailjs/browser';
 
 declare var XLSX: any;

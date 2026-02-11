@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../../../core/services/firebase/auth';
+import { AuthService } from '../../../../core/services/auth/auth';
 
 @Component({
   selector: 'app-login',
@@ -11,40 +11,36 @@ import { AuthService } from '../../../../core/services/firebase/auth';
   templateUrl: './login.html'
 })
 export class Login {
-
   private authService = inject(AuthService);
   private router = inject(Router);
 
-  // Variables del formulario
   email = '';
   password = '';
   errorMessage = '';
 
-  /*
-  Procesa la autenticación mediante el Backend de Spring Boot
-  Genera y almacena el Token JWT en el navegador
-  */
   loginWithEmail() {
     if (!this.email || !this.password) {
-      this.errorMessage = 'Por favor completa todos los campos obligatorios.';
+      this.errorMessage = 'Debes ingresar tus credenciales para continuar.';
       return;
     }
 
     this.authService.loginWithEmail(this.email, this.password).subscribe({
       next: () => {
-        console.log('Login exitoso: Token JWT recibido y guardado.');
+        // Redirección inmediata para evitar el "doble login"
         this.router.navigate(['/home']);
       },
       error: (error) => {
-        console.error('Error de autenticación:', error);
-
-        // Gestión de errores basada en códigos HTTP de PostgreSQL/Java
-        if (error.status === 401 || error.status === 403) {
-          this.errorMessage = 'Credenciales inválidas. Verifica tu correo y contraseña.';
+        // Manejo de errores sin exponer detalles técnicos sensibles
+        if (error.status === 401) {
+          this.errorMessage = 'El correo o la contraseña son incorrectos. Por favor, verifica tus datos.';
+        } else if (error.status === 404) {
+          this.errorMessage = 'No existe una cuenta asociada a este correo electrónico.';
         } else if (error.status === 0) {
-          this.errorMessage = 'Sin conexión con el servidor. Verifica que el Backend esté activo.';
+          this.errorMessage = 'Error de conexión: El servidor no responde. Verifica tu conexión a internet.';
+        } else if (error.status === 500) {
+          this.errorMessage = 'El servicio de autenticación está experimentando problemas técnicos.';
         } else {
-          this.errorMessage = 'Ha ocurrido un error inesperado al intentar ingresar.';
+          this.errorMessage = 'No se pudo validar tu identidad. Por favor, intenta de nuevo.';
         }
       }
     });

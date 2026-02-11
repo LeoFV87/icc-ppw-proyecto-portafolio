@@ -5,7 +5,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Project, ProjectService } from '../../../../core/services/projects/project';
-import { AuthService } from '../../../../core/services/firebase/auth';
+import { AuthService } from '../../../../core/services/auth/auth';
 
 @Component({
   selector: 'app-my-projects',
