@@ -3,80 +3,76 @@
 
     <div class="mb-8">
       <h1 class="text-3xl font-bold">Configuración de Cuenta</h1>
-      <p class="text-base-content/60">Gestiona tu información personal y preferencias.</p>
+      <p class="text-base-content/60">Gestiona tu información personal y preferencias de LeMiBit.</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
 
       <div class="col-span-1">
-        <div class="card bg-base-100 shadow-xl text-center">
+        <div class="card bg-base-100 shadow-xl text-center border border-base-300">
           <div class="card-body items-center">
             <div class="avatar online placeholder mb-4">
-              <div
-                class="bg-neutral text-neutral-content rounded-full w-32 ring ring-primary ring-offset-base-100 ring-offset-2">
-                @if (currentUser()?.photoURL) {
-                <img [src]="currentUser()?.photoURL" alt="Profile" referrerpolicy="no-referrer" />
+              <div class="bg-neutral text-neutral-content rounded-full w-32 ring ring-primary ring-offset-base-100 ring-offset-2">
+                @if (userProfile()?.photoURL) {
+                  <img [src]="userProfile()?.photoURL" alt="Profile" referrerpolicy="no-referrer" class="object-cover" />
                 } @else {
-                <span class="text-3xl">{{ currentUser()?.email?.charAt(0)?.toUpperCase() }}</span>
+                  <span class="text-3xl">{{ userProfile()?.name?.charAt(0)?.toUpperCase() || 'U' }}</span>
                 }
               </div>
             </div>
 
-            <h2 class="card-title text-xl">{{ currentUser()?.displayName || 'Usuario' }}</h2>
-            <p class="text-sm opacity-70 break-all">{{ currentUser()?.email }}</p>
+            <h2 class="card-title text-xl">{{ userProfile()?.name || 'Usuario' }}</h2>
+            <p class="text-sm opacity-70 break-all">{{ userProfile()?.email }}</p>
 
             <div class="divider"></div>
 
-            <div class="badge badge-lg" [ngClass]="{
+            <div class="badge badge-lg font-bold" [ngClass]="{
                    'badge-primary': hasRole('admin'),
                    'badge-secondary': hasRole('programmer'),
                    'badge-ghost': !hasRole('admin') && !hasRole('programmer')
                  }">
               {{ userProfile()?.role || 'user' | uppercase }}
             </div>
-            <p class="text-xs mt-2 opacity-50">Rol actual</p>
+            <p class="text-xs mt-2 opacity-50 uppercase tracking-widest">Rol del Sistema</p>
           </div>
         </div>
       </div>
 
       <div class="col-span-2">
-        <div class="card bg-base-100 shadow-xl">
+        <div class="card bg-base-100 shadow-xl border border-base-300">
           <div class="card-body">
-            <h2 class="card-title mb-4">Información Básica</h2>
+            <h2 class="card-title mb-6 border-b pb-2">Información de la Cuenta</h2>
 
-            <form>
+            <div class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="form-control">
-                  <label class="label"><span class="label-text">Nombre Completo</span></label>
-                  <input type="text" [value]="currentUser()?.displayName" class="input input-bordered" disabled />
-                  <label class="label"><span class="label-text-alt text-warning">Gestionado por Google</span></label>
+                <div class="form-control w-full">
+                  <label class="label"><span class="label-text font-bold">Nombre Completo</span></label>
+                  <input type="text" [value]="userProfile()?.name" class="input input-bordered bg-base-200" disabled />
                 </div>
 
-                <div class="form-control">
-                  <label class="label"><span class="label-text">Correo Electrónico</span></label>
-                  <input type="email" [value]="currentUser()?.email" class="input input-bordered" disabled />
-                </div>
-
-                <div class="form-control md:col-span-2">
-                  <label class="label"><span class="label-text">User ID (Firebase)</span></label>
-                  <input type="text" [value]="currentUser()?.uid" class="input input-bordered font-mono text-xs"
-                    disabled />
+                <div class="form-control w-full">
+                  <label class="label"><span class="label-text font-bold">Correo Electrónico</span></label>
+                  <input type="email" [value]="userProfile()?.email" class="input input-bordered bg-base-200" disabled />
                 </div>
               </div>
 
-              <div class="divider">Zona de Peligro</div>
+              <div class="bg-base-200 p-4 rounded-xl mt-4">
+                <h3 class="font-bold mb-1">Privacidad y Seguridad</h3>
+                <p class="text-xs opacity-60">Tu información está protegida y sincronizada con nuestra base de datos central.</p>
+              </div>
 
-              <div class="flex justify-between items-center">
+              <div class="divider">Zona de Gestión</div>
+
+              <div class="flex justify-between items-center p-4 bg-error/5 border border-error/20 rounded-2xl">
                 <div>
                   <h3 class="font-bold text-error">Cerrar Sesión</h3>
-                  <p class="text-xs opacity-60">Sal de tu cuenta en este dispositivo.</p>
+                  <p class="text-xs opacity-60">Finalizar sesión de forma segura.</p>
                 </div>
-                <button (click)="logout()" class="btn btn-error btn-outline btn-sm">
+                <button (click)="logout()" class="btn btn-error btn-outline">
                   Cerrar Sesión
                 </button>
               </div>
-
-            </form>
+            </div>
           </div>
         </div>
       </div>

@@ -8,6 +8,7 @@ import { AdvisoryService } from '../../../../core/services/advisory/advisory';
 
 interface Programmer {
   id: number;
+  name: string; // Se agregó para coincidir con el DTO de PostgreSQL
   displayName: string;
   email: string;
   role: string;
@@ -46,6 +47,7 @@ export class Explorar implements OnInit {
   loadProgrammers() {
     this.http.get<Programmer[]>('http://localhost:8080/api/users').subscribe({
       next: (data) => {
+        // Filtramos para mostrar solo a los que tienen rol programmer en minúsculas
         const onlyDevs = data.filter(u => u.role?.toLowerCase() === 'programmer');
         this.programmers.set(onlyDevs);
       },
@@ -63,7 +65,6 @@ export class Explorar implements OnInit {
     this.selectedSlot.set('');
     this.availableSlots.set([]);
 
-    // Cargamos horarios reales por ID para el combo
     this.advisoryService.getAvailability(dev.id).subscribe({
       next: (slots) => this.availableSlots.set(slots),
       error: () => this.availableSlots.set([])
@@ -87,14 +88,14 @@ export class Explorar implements OnInit {
     if (dev && user && this.requestTopic() && this.selectedSlot()) {
       try {
         await this.advisoryService.requestAdvisory({
-          // CLIENTE: Datos del que solicita
+          // CLIENTE
           clientId: user.uid || '1',
           clientName: user.displayName || 'Usuario',
           clientEmail: user.email || '',
 
-          // PROGRAMADOR: Usamos EMAIL como ID para que el backend lo encuentre
+          // PROGRAMADOR: Usamos name para persistir el nombre real de PostgreSQL
           programmerId: dev.email,
-          programmerName: dev.displayName,
+          programmerName: dev.name || dev.displayName,
 
           // ASESORÍA
           topic: this.requestTopic(),

@@ -1,3 +1,4 @@
+// src/app/shared/components/navbar/navbar.ts
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -10,55 +11,51 @@ import { AuthService } from '../../../core/services/firebase/auth';
   templateUrl: './navbar.html'
 })
 export class Navbar {
-
   private authService = inject(AuthService);
-  public router = inject(Router);
+  private router = inject(Router);
 
-  // Signals para usar en el HTML
+  // Referencias a los signals del servicio para que el HTML reaccione
   currentUser = this.authService.currentUser;
   userProfile = this.authService.userProfile;
 
-  // Signal para el tema
   currentTheme = signal('light');
 
   constructor() {
-    // Al iniciar, leemos si el usuario ya tenía un tema guardado
+    // Recuperamos el tema preferido de la laptop
     const savedTheme = localStorage.getItem('theme') || 'light';
     this.setTheme(savedTheme);
   }
 
   /**
-   * Determina si el usuario se encuentra en la página de inicio.
-   * Se utiliza para deshabilitar el clic en el logo y ocultar el botón "Home".
+   * Cambia entre modo claro y oscuro.
    */
-  isHomePage(): boolean {
-    return this.router.url === '/' || this.router.url === '/home';
-  }
-
-  // Función para alternar entre Sol y Luna
   toggleTheme() {
     const newTheme = this.currentTheme() === 'light' ? 'dark' : 'light';
     this.setTheme(newTheme);
   }
 
-  // Lógica interna para aplicar el cambio de tema (DaisyUI)
   private setTheme(theme: string) {
     this.currentTheme.set(theme);
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('theme', theme);
   }
 
+  /**
+   * Proxy para verificar roles desde el HTML.
+   */
+  hasRole(role: string): boolean {
+    return this.authService.hasRole(role);
+  }
+
+  /**
+   * Cierra la sesión y limpia los datos de Leo Vásconez del sistema.
+   */
   logout() {
     this.authService.logout().subscribe({
       next: () => {
-        // Redirección forzada al login tras cerrar sesión
         this.router.navigate(['/auth/login']);
       },
       error: (err) => console.error('Error al cerrar sesión:', err)
     });
-  }
-
-  hasRole(role: string): boolean {
-    return this.userProfile()?.role === role;
   }
 }

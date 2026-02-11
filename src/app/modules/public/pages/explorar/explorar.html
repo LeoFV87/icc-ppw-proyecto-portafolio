@@ -1,6 +1,5 @@
 <div class="min-h-screen bg-base-100 py-10 px-4">
   <div class="max-w-7xl mx-auto">
-
     <div class="text-center mb-12">
       <h1 class="text-4xl font-black mb-4">Explora nuestro Talento</h1>
       <p class="text-base-content/60">Datos en tiempo real de nuestros programadores.</p>
@@ -8,44 +7,39 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
       @for (dev of programmers(); track dev.id) {
-        <div class="card bg-base-100 shadow-xl border border-base-200 hover:-translate-y-1 transition-all duration-300 overflow-visible">
-
+        <div class="card bg-base-100 shadow-xl border border-base-200 hover:-translate-y-1 transition-all duration-300">
           <div class="h-32 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-t-2xl relative">
              <div class="absolute top-4 right-4 text-4xl opacity-20">💻</div>
           </div>
 
           <div class="flex justify-center -mt-12 px-4">
             <div class="avatar online">
-              <div class="w-24 h-24 rounded-full ring ring-base-100 ring-offset-base-100 ring-offset-2 shadow-lg bg-base-100">
-                <img [src]="dev.photoURL || 'https://ui-avatars.com/api/?name=' + dev.displayName"
-                     referrerpolicy="no-referrer"
-                     class="object-cover" />
+              <div class="w-24 h-24 rounded-full ring ring-base-100 ring-offset-2 shadow-lg bg-base-100">
+                <img [src]="dev.photoURL || 'https://ui-avatars.com/api/?name=' + dev.name"
+                     referrerpolicy="no-referrer" class="object-cover" />
               </div>
             </div>
           </div>
 
           <div class="card-body items-center text-center pt-4">
-            <h2 class="card-title text-2xl">{{ dev.displayName }}</h2>
-
-            <div class="badge badge-secondary badge-outline mb-2">{{ dev.role | uppercase }}</div>
+            <h2 class="card-title text-2xl">{{ dev.name || 'Programador' }}</h2>
+            <div class="badge badge-secondary badge-outline mb-2 font-bold uppercase">{{ dev.specialty || 'PROGRAMMER' }}</div>
 
             <p class="text-sm opacity-70 line-clamp-2 px-2">
-              {{ dev.description || 'Programador listo para ayudarte en tu próximo proyecto.' }}
+              {{ dev.description || 'Especialista en desarrollo de software listo para colaborar.' }}
             </p>
 
             <div class="card-actions justify-center mt-6 gap-2 w-full">
-              <a [routerLink]="['/portfolio', dev.id]" class="btn btn-outline btn-sm rounded-full">
+              <a [routerLink]="['/portfolio', dev.id]" class="btn btn-outline btn-sm rounded-full flex-1">
                 📂 Ver Portafolio
               </a>
 
               @if (currentUser()?.email !== dev.email) {
-                <button (click)="openRequestModal(dev)" class="btn btn-primary btn-sm rounded-full px-6">
+                <button (click)="openRequestModal(dev)" class="btn btn-primary btn-sm rounded-full px-6 flex-1">
                   📅 Solicitar
                 </button>
               } @else {
-                <div class="badge badge-ghost opacity-50 cursor-not-allowed p-3">
-                  Mi Perfil 👨‍💻
-                </div>
+                <div class="badge badge-ghost opacity-50 p-3 flex-1">Mi Perfil 👨‍💻</div>
               }
             </div>
           </div>
@@ -59,56 +53,40 @@
   </div>
 
   @if (isModalOpen()) {
-    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-fade-in">
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div class="card w-full max-w-lg bg-base-100 shadow-2xl">
         <div class="card-body">
-          <h3 class="font-bold text-lg text-primary">Solicitar Asesoría a {{ selectedProgrammer()?.displayName }}</h3>
+          <h3 class="font-bold text-xl text-primary">Solicitar Asesoría a {{ selectedProgrammer()?.name }}</h3>
 
           <div class="form-control w-full mt-4">
-            <label class="label">
-              <span class="label-text font-bold">Selecciona un Horario *</span>
-            </label>
-
+            <label class="label"><span class="label-text font-bold">Horario Disponible *</span></label>
             @if (availableSlots().length > 0) {
-              <select
-                [ngModel]="selectedSlot()"
-                (ngModelChange)="selectedSlot.set($event)"
-                class="select select-bordered w-full">
-                <option value="" disabled>-- Elige una opción --</option>
+              <select [ngModel]="selectedSlot()" (ngModelChange)="selectedSlot.set($event)" class="select select-bordered w-full">
+                <option value="" disabled>-- Selecciona un bloque --</option>
                 @for (slot of availableSlots(); track slot) {
                   <option [value]="slot">{{ slot }}</option>
                 }
               </select>
             } @else {
-              <div class="alert alert-warning text-sm py-2">
-                <span>⚠️ Este programador no tiene horarios configurados.</span>
-              </div>
+              <div class="alert alert-warning text-xs">⚠️ No hay horarios configurados.</div>
             }
           </div>
 
           <div class="form-control w-full mt-4">
-            <label class="label"><span class="label-text font-bold">Tema de la Asesoría *</span></label>
-            <input type="text"
-                   [ngModel]="requestTopic()"
-                   (ngModelChange)="requestTopic.set($event)"
-                   placeholder="Ej: Revisión de código..."
-                   class="input input-bordered w-full" />
+            <label class="label"><span class="label-text font-bold">Tema *</span></label>
+            <input type="text" [ngModel]="requestTopic()" (ngModelChange)="requestTopic.set($event)"
+                   placeholder="Ej: Revisión de arquitectura" class="input input-bordered w-full" />
           </div>
 
           <div class="form-control w-full mt-4">
-            <label class="label"><span class="label-text">Mensaje (Opcional)</span></label>
-            <textarea [ngModel]="requestMessage()"
-                      (ngModelChange)="requestMessage.set($event)"
-                      class="textarea textarea-bordered h-24"
-                      placeholder="Detalles adicionales..."></textarea>
+            <label class="label"><span class="label-text">Mensaje Adicional</span></label>
+            <textarea [ngModel]="requestMessage()" (ngModelChange)="requestMessage.set($event)"
+                      class="textarea textarea-bordered h-24" placeholder="¿En qué necesitas ayuda?"></textarea>
           </div>
 
           <div class="card-actions justify-end mt-6">
-            <button class="btn btn-ghost" (click)="closeModal()">Cancelar</button>
-
-            <button class="btn btn-primary px-8"
-                    (click)="sendRequest()"
-                    [disabled]="!requestTopic() || !selectedSlot()">
+            <button class="btn btn-ghost" (click)="closeModal()">Cerrar</button>
+            <button class="btn btn-primary px-8" (click)="sendRequest()" [disabled]="!requestTopic() || !selectedSlot()">
               Enviar Solicitud
             </button>
           </div>

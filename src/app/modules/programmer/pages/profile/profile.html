@@ -1,111 +1,79 @@
-<div class="max-w-3xl mx-auto p-6 bg-base-100 shadow-xl rounded-2xl mt-8">
+<div class="max-w-4xl mx-auto p-6 bg-base-100 shadow-xl rounded-2xl mt-8 border border-base-300">
   <div class="text-center mb-8">
     <div class="avatar mb-4">
-      <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-        <img [src]="photoInput() || currentUser()?.photoURL || 'https://ui-avatars.com/api/?name=' + currentUser()?.displayName"
-             referrerpolicy="no-referrer"/>
+      <div class="w-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+        <img [src]="photoInput() || userProfile()?.photoURL || 'https://ui-avatars.com/api/?name=' + (userProfile()?.name || 'Usuario')"
+             referrerpolicy="no-referrer" class="object-cover"/>
       </div>
     </div>
-    <h2 class="text-2xl font-bold">{{ currentUser()?.displayName }}</h2>
-    <div class="badge badge-secondary mt-2 font-bold uppercase">
+    <h2 class="text-3xl font-bold">{{ userProfile()?.name || 'Cargando nombre...' }}</h2>
+    <div class="badge badge-secondary mt-2 font-bold uppercase p-4">
       {{ specialty() || 'PROGRAMADOR' }}
     </div>
   </div>
 
-  <div class="form-control w-full mb-4">
-    <label class="label"><span class="label-text font-bold">Título / Especialidad</span></label>
-    <input
-      type="text"
-      [ngModel]="specialty()"
-      (ngModelChange)="specialty.set($event)"
-      placeholder="Ej: Full Stack Developer, Arquitecto de Software..."
-      class="input input-bordered w-full"
-    />
-  </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="space-y-4">
+      <h3 class="text-lg font-bold border-b pb-2">Información Básica</h3>
 
-  <div class="form-control w-full mb-4">
-    <label class="label"><span class="label-text font-bold">Foto de Perfil (URL)</span></label>
-    <input
-      type="text"
-      [ngModel]="photoInput()"
-      (ngModelChange)="photoInput.set($event)"
-      placeholder="https://..."
-      class="input input-bordered w-full"
-    />
-    <label class="label"><span class="label-text-alt">Pega aquí el enlace de tu imagen</span></label>
-  </div>
+      <div class="form-control w-full">
+        <label class="label"><span class="label-text font-bold">Nombre Completo</span></label>
+        <input type="text" [ngModel]="name()" (ngModelChange)="name.set($event)"
+               class="input input-bordered w-full" placeholder="Tu nombre en PostgreSQL" />
+      </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-    <div class="form-control w-full">
-      <label class="label"><span class="label-text font-bold">LinkedIn (URL)</span></label>
-      <input
-        type="text"
-        [ngModel]="linkedin()"
-        (ngModelChange)="linkedin.set($event)"
-        placeholder="https://linkedin.com/in/..."
-        class="input input-bordered w-full"
-      />
+      <div class="form-control w-full">
+        <label class="label"><span class="label-text font-bold">Título / Especialidad</span></label>
+        <input type="text" [ngModel]="specialty()" (ngModelChange)="specialty.set($event)"
+               class="input input-bordered w-full" placeholder="Ej: Full Stack Developer" />
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label"><span class="label-text font-bold">URL de Foto</span></label>
+        <input type="text" [ngModel]="photoInput()" (ngModelChange)="photoInput.set($event)"
+               class="input input-bordered w-full" placeholder="https://..." />
+      </div>
     </div>
-    <div class="form-control w-full">
-      <label class="label"><span class="label-text font-bold">GitHub (URL)</span></label>
-      <input
-        type="text"
-        [ngModel]="github()"
-        (ngModelChange)="github.set($event)"
-        placeholder="https://github.com/..."
-        class="input input-bordered w-full"
-      />
+
+    <div class="space-y-4">
+      <h3 class="text-lg font-bold border-b pb-2">Enlaces y Social</h3>
+
+      <div class="form-control w-full">
+        <label class="label"><span class="label-text font-bold">LinkedIn</span></label>
+        <input type="text" [ngModel]="linkedin()" (ngModelChange)="linkedin.set($event)"
+               class="input input-bordered w-full" placeholder="URL de tu perfil" />
+      </div>
+
+      <div class="form-control w-full">
+        <label class="label"><span class="label-text font-bold">GitHub</span></label>
+        <input type="text" [ngModel]="github()" (ngModelChange)="github.set($event)"
+               class="input input-bordered w-full" placeholder="URL de tu repositorio" />
+      </div>
     </div>
   </div>
 
-  <div class="form-control w-full mb-4">
-    <label class="label"><span class="label-text font-bold">Biografía / Descripción</span></label>
-    <textarea
-      [ngModel]="description()"
-      (ngModelChange)="description.set($event)"
-      class="textarea textarea-bordered h-24"
-      placeholder="Cuéntale a los clientes sobre tu experiencia...">
-    </textarea>
-    <label class="label"><span class="label-text-alt">Esto aparecerá en tu tarjeta de 'Explorar'</span></label>
+  <div class="mt-6 space-y-4">
+    <div class="form-control w-full">
+      <label class="label"><span class="label-text font-bold">Biografía</span></label>
+      <textarea [ngModel]="description()" (ngModelChange)="description.set($event)"
+                class="textarea textarea-bordered h-28" placeholder="Sobre ti..."></textarea>
+    </div>
+
+    <div class="form-control w-full">
+      <label class="label"><span class="label-text font-bold">Habilidades (Separadas por comas)</span></label>
+      <input type="text" [ngModel]="skillsInput()" (ngModelChange)="skillsInput.set($event)"
+             class="input input-bordered w-full" placeholder="Angular, Java, Spring..." />
+    </div>
+
+    <div class="form-control w-full p-4 bg-primary/5 rounded-xl border border-primary/20">
+      <label class="label"><span class="label-text font-bold text-primary">Horarios Disponibles</span></label>
+      <input type="text" [ngModel]="availabilityInput()" (ngModelChange)="availabilityInput.set($event)"
+             class="input input-bordered w-full border-primary" placeholder="Lunes 9:00-12:00..." />
+    </div>
   </div>
 
-  <div class="form-control w-full mb-4">
-    <label class="label"><span class="label-text font-bold">Habilidades Técnicas</span></label>
-    <input
-      type="text"
-      [ngModel]="skillsInput()"
-      (ngModelChange)="skillsInput.set($event)"
-      placeholder="Ej: Angular, Firebase, Tailwind CSS, Figma"
-      class="input input-bordered w-full"
-    />
-    <label class="label"><span class="label-text-alt">Separa tus habilidades con comas</span></label>
-  </div>
-
-  <div class="form-control w-full mb-6 p-4 bg-primary/5 rounded-lg border border-primary/20">
-    <label class="label">
-      <span class="label-text font-bold text-primary">Horarios de Disponibilidad (Asesorías)</span>
-    </label>
-    <input
-      type="text"
-      [ngModel]="availabilityInput()"
-      (ngModelChange)="availabilityInput.set($event)"
-      placeholder="Ej: Lunes 09:00 - 12:00, Miércoles 14:00 - 17:00"
-      class="input input-bordered w-full border-primary focus:border-primary-focus"
-    />
-    <label class="label">
-      <span class="label-text-alt italic opacity-70">
-        Separa los bloques de tiempo con comas. **¡Obligatorio para que los clientes te agenden!**
-      </span>
-    </label>
-  </div>
-
-  <button
-    (click)="saveProfile()"
-    class="btn btn-primary w-full shadow-lg"
-    [disabled]="isSaving()">
-    @if (isSaving()) {
-      <span class="loading loading-spinner"></span>
-    }
-    Guardar Perfil en PostgreSQL
+  <button (click)="saveProfile()" class="btn btn-primary w-full mt-8 shadow-lg" [disabled]="isSaving()">
+    <span *ngIf="isSaving()" class="loading loading-spinner"></span>
+    Actualizar Datos en PostgreSQL
   </button>
 </div>
